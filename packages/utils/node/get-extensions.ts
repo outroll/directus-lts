@@ -4,8 +4,8 @@ import {
 	HYBRID_EXTENSION_TYPES,
 	NESTED_EXTENSION_TYPES,
 	ExtensionManifest,
-} from '@directus/constants';
-import type { ApiExtensionType, AppExtensionType, Extension } from '@directus/types';
+} from '@outroll/constants';
+import type { ApiExtensionType, AppExtensionType, Extension } from '@outroll/types';
 import fse from 'fs-extra';
 import path from 'path';
 import { isIn, isTypeIn } from './array-helpers.js';

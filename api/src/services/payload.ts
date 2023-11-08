@@ -1,6 +1,6 @@
-import type { Accountability, Query, SchemaOverview } from '@directus/types';
+import type { Accountability, Query, SchemaOverview } from '@outroll/types';
 import { format, parseISO, isValid } from 'date-fns';
-import { parseJSON, toArray } from '@directus/utils';
+import { parseJSON, toArray } from '@outroll/utils';
 import flat from 'flat';
 import Joi from 'joi';
 import type { Knex } from 'knex';

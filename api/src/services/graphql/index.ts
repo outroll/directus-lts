@@ -1,8 +1,8 @@
-import { FUNCTIONS } from '@directus/constants';
-import type { BaseException } from '@directus/exceptions';
-import type { Accountability, Aggregate, Filter, PrimaryKey, Query, SchemaOverview } from '@directus/types';
-import { Action } from '@directus/constants';
-import { parseFilterFunctionPath } from '@directus/utils';
+import { FUNCTIONS } from '@outroll/constants';
+import type { BaseException } from '@outroll/exceptions';
+import type { Accountability, Aggregate, Filter, PrimaryKey, Query, SchemaOverview } from '@outroll/types';
+import { Action } from '@outroll/constants';
+import { parseFilterFunctionPath } from '@outroll/utils';
 import argon2 from 'argon2';
 import {
 	ArgumentNode,

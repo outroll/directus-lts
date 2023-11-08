@@ -1,4 +1,4 @@
-import { parseJSON } from '@directus/utils';
+import { parseJSON } from '@outroll/utils';
 import Busboy from 'busboy';
 import express, { RequestHandler } from 'express';
 import { load as loadYaml } from 'js-yaml';
@@ -59,7 +59,7 @@ const schemaMultipartHandler: RequestHandler = (req, res, next) => {
 
 		isFileIncluded = true;
 
-		const { readableStreamToString } = await import('@directus/utils/node');
+		const { readableStreamToString } = await import('@outroll/utils/node');
 
 		try {
 			const uploadedString = await readableStreamToString(fileStream);

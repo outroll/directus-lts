@@ -5,15 +5,15 @@ import {
 	EXTENSION_TYPES,
 	ExtensionManifest,
 	HYBRID_EXTENSION_TYPES,
-} from '@directus/constants';
+} from '@outroll/constants';
 import type {
 	ExtensionOptions,
 	ExtensionOptionsBundleEntry,
 	NestedExtensionType,
 	ExtensionManifest as TExtensionManifest,
-} from '@directus/types';
-import { isIn, isTypeIn } from '@directus/utils';
-import { pathToRelativeUrl } from '@directus/utils/node';
+} from '@outroll/types';
+import { isIn, isTypeIn } from '@outroll/utils';
+import { pathToRelativeUrl } from '@outroll/utils/node';
 import chalk from 'chalk';
 import execa from 'execa';
 import fse from 'fs-extra';

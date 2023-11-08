@@ -1,4 +1,4 @@
-import { toArray } from '@directus/utils';
+import { toArray } from '@outroll/utils';
 import type { AuthDriver } from './auth/auth.js';
 import {
 	LDAPAuthDriver,

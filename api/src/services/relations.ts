@@ -1,9 +1,9 @@
-import { createInspector } from '@directus/schema';
-import type { Accountability, Query, Relation, RelationMeta, SchemaOverview } from '@directus/types';
-import { toArray } from '@directus/utils';
+import { createInspector } from '@outroll/schema';
+import type { Accountability, Query, Relation, RelationMeta, SchemaOverview } from '@outroll/types';
+import { toArray } from '@outroll/utils';
 import type Keyv from 'keyv';
 import type { Knex } from 'knex';
-import type { ForeignKey, SchemaInspector } from '@directus/schema';
+import type { ForeignKey, SchemaInspector } from '@outroll/schema';
 import { clearSystemCache, getCache } from '../cache.js';
 import getDatabase, { getSchemaInspector } from '../database/index.js';
 import { getHelpers, Helpers } from '../database/helpers/index.js';

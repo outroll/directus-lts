@@ -1,4 +1,4 @@
-import { BaseException } from '@directus/exceptions';
+import { BaseException } from '@outroll/exceptions';
 
 export class InvalidCredentialsException extends BaseException {
 	constructor(message = 'Invalid user credentials.') {

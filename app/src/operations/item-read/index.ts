@@ -1,5 +1,5 @@
-import { defineOperationApp } from '@directus/utils';
-import { toArray } from '@directus/utils';
+import { defineOperationApp } from '@outroll/utils';
+import { toArray } from '@outroll/utils';
 
 export default defineOperationApp({
 	id: 'item-read',

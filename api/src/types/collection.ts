@@ -1,5 +1,5 @@
-import type { Field } from '@directus/types';
-import type { Table } from '@directus/schema';
+import type { Field } from '@outroll/types';
+import type { Table } from '@outroll/schema';
 
 export type CollectionMeta = {
 	collection: string;

@@ -1,5 +1,5 @@
 import formatTitle from '@directus/format-title';
-import { toArray } from '@directus/utils';
+import { toArray } from '@outroll/utils';
 import Busboy from 'busboy';
 import express, { RequestHandler } from 'express';
 import Joi from 'joi';

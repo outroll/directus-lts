@@ -1,4 +1,4 @@
-import { parseJSON } from '@directus/utils';
+import { parseJSON } from '@outroll/utils';
 import type { Knex } from 'knex';
 
 // [before, after, after-option additions]

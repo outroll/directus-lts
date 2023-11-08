@@ -1,4 +1,4 @@
-import { BaseException } from '@directus/exceptions';
+import { BaseException } from '@outroll/exceptions';
 
 export class InvalidConfigException extends BaseException {
 	constructor(message = 'Invalid config', extensions?: Record<string, any>) {

@@ -4,7 +4,7 @@ import * as http from 'http';
 import * as https from 'https';
 import { once } from 'lodash-es';
 import qs from 'qs';
-import { isUpToDate } from '@directus/update-check';
+import { isUpToDate } from '@outroll/update-check';
 import url from 'url';
 import * as pkg from './utils/package.js';
 import createApp from './app.js';

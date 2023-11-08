@@ -1,4 +1,4 @@
-import { BaseException } from '@directus/exceptions';
+import { BaseException } from '@outroll/exceptions';
 
 export class UserSuspendedException extends BaseException {
 	constructor(message = 'User suspended.') {

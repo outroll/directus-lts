@@ -1,6 +1,6 @@
 /** @TODO replace with import from @directus/utils */
 import { getFilterOperatorsForType } from '../../utils/get-filter-operators-for-type';
-import type { ClientFilterOperator } from '@directus/types';
+import type { ClientFilterOperator } from '@outroll/types';
 import { FilterValidator, FilterEmptyValidator } from '@query/filter';
 import { GeneratedFilter } from '..';
 

@@ -1,5 +1,5 @@
 {
-	"name": "@directus/constants",
+	"name": "@outroll/constants",
 	"version": "9.25.2",
 	"type": "module",
 	"scripts": {
@@ -27,7 +27,7 @@
 		"access": "public"
 	},
 	"devDependencies": {
-		"@directus/tsconfig": "0.0.6",
+		"@outroll/tsconfig": "0.0.7",
 		"typescript": "4.9.5"
 	},
 	"dependencies": {

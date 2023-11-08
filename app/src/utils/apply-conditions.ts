@@ -1,6 +1,6 @@
-import { Field } from '@directus/types';
+import { Field } from '@outroll/types';
 import { parseFilter } from '@/utils/parse-filter';
-import { validatePayload } from '@directus/utils';
+import { validatePayload } from '@outroll/utils';
 import { merge } from 'lodash';
 
 export function applyConditions(item: Record<string, any>, field: Field) {

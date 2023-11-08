@@ -1,4 +1,4 @@
-import { defineOperationApp } from '@directus/utils';
+import { defineOperationApp } from '@outroll/utils';
 
 export default defineOperationApp({
 	id: 'request',

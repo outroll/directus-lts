@@ -30,7 +30,7 @@ import api from '@/api';
 import { VALIDATION_TYPES } from '@/constants';
 import { APIError } from '@/types/error';
 import { unexpectedError } from '@/utils/unexpected-error';
-import { getEndpoint } from '@directus/utils';
+import { getEndpoint } from '@outroll/utils';
 
 export default defineComponent({
 	props: {

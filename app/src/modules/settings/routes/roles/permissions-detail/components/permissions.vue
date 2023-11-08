@@ -22,8 +22,8 @@
 <script lang="ts">
 import { useI18n } from 'vue-i18n';
 import { defineComponent, PropType, computed } from 'vue';
-import { Permission, Role } from '@directus/types';
-import { useSync } from '@directus/composables';
+import { Permission, Role } from '@outroll/types';
+import { useSync } from '@outroll/composables';
 
 export default defineComponent({
 	props: {

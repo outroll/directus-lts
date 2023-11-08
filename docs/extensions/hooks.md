@@ -324,7 +324,7 @@ export default ({ filter }, { services, exceptions }) => {
 ### Add Sentry monitoring
 
 ```js
-import { defineHook } from '@directus/extensions-sdk';
+import { defineHook } from '@outroll/extensions-sdk';
 import * as Sentry from '@sentry/node';
 import '@sentry/tracing';
 
@@ -333,7 +333,7 @@ export default defineHook(({ init }, { env }) => {
     Sentry.init({
         dsn: SENTRY_DSN
     });
-    
+
     init('routes.before', ({ app }) => {
         app.use(Sentry.Handlers.requestHandler());
         console.log('-- Sentry Request Handler Added --');

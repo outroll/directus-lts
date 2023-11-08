@@ -1,4 +1,4 @@
-import type { Relation, RelationMeta } from '@directus/types';
+import type { Relation, RelationMeta } from '@outroll/types';
 import { getRelationType } from './get-relation-type.js';
 
 type RelationInfo = {

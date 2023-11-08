@@ -1,5 +1,5 @@
-import { BaseException } from '@directus/exceptions';
-import type { Range } from '@directus/storage';
+import { BaseException } from '@outroll/exceptions';
+import type { Range } from '@outroll/storage';
 
 export class RangeNotSatisfiableException extends BaseException {
 	constructor(range?: Range) {

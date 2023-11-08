@@ -1,4 +1,4 @@
-import { getSimpleHash } from '@directus/utils';
+import { getSimpleHash } from '@outroll/utils';
 /**
  * Generate an index name for a given collection + fields combination.
  *

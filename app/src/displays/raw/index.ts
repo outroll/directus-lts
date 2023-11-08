@@ -1,5 +1,5 @@
-import { defineDisplay } from '@directus/utils';
-import { TYPES, LOCAL_TYPES } from '@directus/constants';
+import { defineDisplay } from '@outroll/utils';
+import { TYPES, LOCAL_TYPES } from '@outroll/constants';
 
 export default defineDisplay({
 	id: 'raw',

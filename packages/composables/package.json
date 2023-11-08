@@ -1,5 +1,5 @@
 {
-	"name": "@directus/composables",
+	"name": "@outroll/composables",
 	"version": "9.25.2",
 	"type": "module",
 	"scripts": {
@@ -29,8 +29,8 @@
 		"access": "public"
 	},
 	"devDependencies": {
-		"@directus/tsconfig": "0.0.6",
-		"@directus/types": "workspace:*",
+		"@outroll/tsconfig": "0.0.7",
+		"@outroll/types": "workspace:*",
 		"@types/lodash-es": "4.17.7",
 		"@vitest/coverage-c8": "0.29.3",
 		"@vue/test-utils": "2.3.1",
@@ -39,8 +39,8 @@
 		"vitest": "0.29.3"
 	},
 	"dependencies": {
-		"@directus/constants": "workspace:*",
-		"@directus/utils": "workspace:*",
+		"@outroll/constants": "workspace:*",
+		"@outroll/utils": "workspace:*",
 		"lodash-es": "4.17.21",
 		"nanoid": "4.0.2",
 		"vue": "3.2.47"

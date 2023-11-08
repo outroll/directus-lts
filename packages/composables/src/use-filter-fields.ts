@@ -1,4 +1,4 @@
-import type { Field } from '@directus/types';
+import type { Field } from '@outroll/types';
 import { Ref, computed, ComputedRef } from 'vue';
 
 export function useFilterFields<T extends string>(

@@ -1,4 +1,4 @@
-import { Type } from '@directus/types';
+import { Type } from '@outroll/types';
 
 export const VALIDATION_TYPES = ['FAILED_VALIDATION', 'RECORD_NOT_UNIQUE'];
 

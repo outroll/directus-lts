@@ -1,5 +1,5 @@
-import type { Accountability, PrimaryKey } from '@directus/types';
-import { defineOperationApi, optionToObject, toArray } from '@directus/utils';
+import type { Accountability, PrimaryKey } from '@outroll/types';
+import { defineOperationApi, optionToObject, toArray } from '@outroll/utils';
 import { ItemsService } from '../../services/items.js';
 import { getAccountabilityForRole } from '../../utils/get-accountability-for-role.js';
 import { sanitizeQuery } from '../../utils/sanitize-query.js';

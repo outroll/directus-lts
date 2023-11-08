@@ -1,4 +1,4 @@
-import type { FieldFilter, Filter } from '@directus/types';
+import type { FieldFilter, Filter } from '@outroll/types';
 import { flatten } from 'lodash-es';
 import { generateJoi, JoiOptions } from './generate-joi.js';
 import { injectFunctionResults } from './inject-function-results.js';

@@ -1,9 +1,9 @@
-import { createInspector } from '@directus/schema';
-import type { Accountability, FieldMeta, RawField, SchemaOverview } from '@directus/types';
-import { addFieldFlag } from '@directus/utils';
+import { createInspector } from '@outroll/schema';
+import type { Accountability, FieldMeta, RawField, SchemaOverview } from '@outroll/types';
+import { addFieldFlag } from '@outroll/utils';
 import type Keyv from 'keyv';
 import type { Knex } from 'knex';
-import type { Table, SchemaInspector } from '@directus/schema';
+import type { Table, SchemaInspector } from '@outroll/schema';
 import { omit, chunk } from 'lodash-es';
 import { clearSystemCache, getCache } from '../cache.js';
 import { ALIAS_TYPES } from '../constants.js';

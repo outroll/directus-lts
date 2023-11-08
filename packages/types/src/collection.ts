@@ -1,4 +1,4 @@
-import type { Table } from '@directus/schema';
+import type { Table } from '@outroll/schema';
 
 type Translations = {
 	language: string;

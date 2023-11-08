@@ -1,4 +1,4 @@
-import { definePanel } from '@directus/extensions-sdk';
+import { definePanel } from '@outroll/extensions-sdk';
 import PanelComponent from './panel.vue';
 
 export default definePanel({

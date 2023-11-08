@@ -1,5 +1,5 @@
-import type { Accountability, Permission, SchemaOverview } from '@directus/types';
-import { deepMap, parseFilter, parseJSON, parsePreset } from '@directus/utils';
+import type { Accountability, Permission, SchemaOverview } from '@outroll/types';
+import { deepMap, parseFilter, parseJSON, parsePreset } from '@outroll/utils';
 import { cloneDeep } from 'lodash-es';
 import hash from 'object-hash';
 import { getCache, getCacheValue, getSystemCache, setCacheValue, setSystemCache } from '../cache.js';

@@ -1,4 +1,4 @@
-import { defineOperationApi } from '@directus/extensions-sdk';
+import { defineOperationApi } from '@outroll/extensions-sdk';
 
 type Options = {
 	text: string;

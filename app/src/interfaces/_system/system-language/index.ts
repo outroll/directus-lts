@@ -1,4 +1,4 @@
-import { defineInterface } from '@directus/utils';
+import { defineInterface } from '@outroll/utils';
 import InterfaceSystemLanguage from './system-language.vue';
 
 export default defineInterface({

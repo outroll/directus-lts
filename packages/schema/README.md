@@ -8,7 +8,7 @@ The package is initialized by passing it an instance of Knex:
 
 ```ts
 import knex from 'knex';
-import schema from '@directus/schema';
+import schema from '@outroll/schema';
 
 const database = knex({
 	client: 'mysql',

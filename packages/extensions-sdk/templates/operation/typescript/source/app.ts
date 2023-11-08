@@ -1,4 +1,4 @@
-import { defineOperationApp } from '@directus/extensions-sdk';
+import { defineOperationApp } from '@outroll/extensions-sdk';
 
 export default defineOperationApp({
 	id: 'custom',

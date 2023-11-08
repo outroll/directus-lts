@@ -1,5 +1,5 @@
 import { ref, watch } from 'vue';
-import { parseJSON } from '@directus/utils';
+import { parseJSON } from '@outroll/utils';
 
 type LocalStorageObjectType = string | number | boolean | object | null;
 

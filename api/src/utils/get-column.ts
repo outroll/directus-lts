@@ -1,6 +1,6 @@
-import { REGEX_BETWEEN_PARENS } from '@directus/constants';
-import type { FieldFunction, Query, SchemaOverview } from '@directus/types';
-import { getFunctionsForType } from '@directus/utils';
+import { REGEX_BETWEEN_PARENS } from '@outroll/constants';
+import type { FieldFunction, Query, SchemaOverview } from '@outroll/types';
+import { getFunctionsForType } from '@outroll/utils';
 import type { Knex } from 'knex';
 import { getFunctions } from '../database/helpers/index.js';
 import { InvalidQueryException } from '../exceptions/index.js';

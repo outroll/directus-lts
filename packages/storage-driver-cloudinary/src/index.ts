@@ -1,5 +1,5 @@
-import type { Driver, Range } from '@directus/storage';
-import { normalizePath } from '@directus/utils';
+import type { Driver, Range } from '@outroll/storage';
+import { normalizePath } from '@outroll/utils';
 import { Blob, Buffer } from 'node:buffer';
 import { createHash } from 'node:crypto';
 import { extname, join, parse } from 'node:path';

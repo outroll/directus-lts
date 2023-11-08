@@ -1,4 +1,4 @@
-import { defineOperationApi } from '@directus/utils';
+import { defineOperationApi } from '@outroll/utils';
 import { MailService } from '../../services/mail/index.js';
 import { md } from '../../utils/md.js';
 

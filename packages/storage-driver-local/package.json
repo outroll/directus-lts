@@ -1,5 +1,5 @@
 {
-	"name": "@directus/storage-driver-local",
+	"name": "@outroll/storage-driver-local",
 	"version": "9.25.2",
 	"type": "module",
 	"scripts": {
@@ -29,11 +29,11 @@
 		"access": "public"
 	},
 	"dependencies": {
-		"@directus/storage": "workspace:*",
-		"@directus/utils": "workspace:*"
+		"@outroll/storage": "workspace:*",
+		"@outroll/utils": "workspace:*"
 	},
 	"devDependencies": {
-		"@directus/tsconfig": "0.0.6",
+		"@outroll/tsconfig": "0.0.7",
 		"@ngneat/falso": "6.4.0",
 		"@vitest/coverage-c8": "0.29.3",
 		"typescript": "4.9.5",

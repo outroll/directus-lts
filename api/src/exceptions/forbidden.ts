@@ -1,4 +1,4 @@
-import * as exceptions from '@directus/exceptions';
+import * as exceptions from '@outroll/exceptions';
 
 const { BaseException } = exceptions;
 

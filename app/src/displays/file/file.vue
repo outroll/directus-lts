@@ -18,7 +18,7 @@
 <script lang="ts">
 import { defineComponent, PropType, computed, ref } from 'vue';
 import { readableMimeType } from '@/utils/readable-mime-type';
-import { useElementSize } from '@directus/composables';
+import { useElementSize } from '@outroll/composables';
 
 type File = {
 	id: string;

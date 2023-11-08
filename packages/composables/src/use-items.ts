@@ -1,5 +1,5 @@
-import type { Item, Query } from '@directus/types';
-import { getEndpoint, moveInArray } from '@directus/utils';
+import type { Item, Query } from '@outroll/types';
+import { getEndpoint, moveInArray } from '@outroll/utils';
 import axios from 'axios';
 import { isEqual, throttle } from 'lodash-es';
 import { ComputedRef, Ref, WritableComputedRef, computed, ref, unref, watch } from 'vue';

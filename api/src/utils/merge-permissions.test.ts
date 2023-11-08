@@ -1,4 +1,4 @@
-import type { Filter, Permission } from '@directus/types';
+import type { Filter, Permission } from '@outroll/types';
 import { describe, expect, test } from 'vitest';
 import { mergePermission } from './merge-permissions.js';
 

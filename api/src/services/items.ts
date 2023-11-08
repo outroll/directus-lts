@@ -1,5 +1,5 @@
-import type { Accountability, PermissionsAction, Query, SchemaOverview } from '@directus/types';
-import { Action } from '@directus/constants';
+import type { Accountability, PermissionsAction, Query, SchemaOverview } from '@outroll/types';
+import { Action } from '@outroll/constants';
 import type Keyv from 'keyv';
 import type { Knex } from 'knex';
 import { assign, clone, cloneDeep, omit, pick, without } from 'lodash-es';

@@ -1,5 +1,5 @@
 {
-	"name": "@directus/utils",
+	"name": "@outroll/utils",
 	"version": "9.25.2",
 	"type": "module",
 	"scripts": {
@@ -40,8 +40,8 @@
 		"access": "public"
 	},
 	"dependencies": {
-		"@directus/constants": "workspace:*",
-		"@directus/storage": "workspace:*",
+		"@outroll/constants": "workspace:*",
+		"@outroll/storage": "workspace:*",
 		"date-fns": "2.29.3",
 		"fs-extra": "11.1.0",
 		"joi": "17.8.4",
@@ -51,8 +51,8 @@
 		"vue": "3.2.47"
 	},
 	"devDependencies": {
-		"@directus/tsconfig": "0.0.6",
-		"@directus/types": "workspace:*",
+		"@outroll/tsconfig": "0.0.7",
+		"@outroll/types": "workspace:*",
 		"@ngneat/falso": "6.4.0",
 		"@types/fs-extra": "11.0.1",
 		"@types/lodash-es": "4.17.7",

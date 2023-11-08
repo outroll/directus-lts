@@ -1,4 +1,4 @@
-import { Field } from '@directus/types';
+import { Field } from '@outroll/types';
 
 export function getJSType(field: Field): string {
 	if (

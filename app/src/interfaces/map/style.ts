@@ -1,4 +1,4 @@
-import { cssVar } from '@directus/utils/browser';
+import { cssVar } from '@outroll/utils/browser';
 
 export function getMapStyle() {
 	const color = [

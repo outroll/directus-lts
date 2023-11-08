@@ -24,7 +24,7 @@
 <script setup lang="ts">
 import { useClipboard } from '@/composables/use-clipboard';
 import { translate } from '@/utils/translate-object-values';
-import { FlowRaw } from '@directus/types';
+import { FlowRaw } from '@outroll/types';
 import { useI18n } from 'vue-i18n';
 
 defineProps<{

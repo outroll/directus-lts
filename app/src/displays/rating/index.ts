@@ -1,4 +1,4 @@
-import { defineDisplay } from '@directus/utils';
+import { defineDisplay } from '@outroll/utils';
 import DisplayRating from './rating.vue';
 
 export default defineDisplay({

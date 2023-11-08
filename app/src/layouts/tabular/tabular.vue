@@ -180,11 +180,11 @@ export default {
 <script lang="ts" setup>
 import { useShortcut } from '@/composables/use-shortcut';
 import { Collection } from '@/types/collections';
-import { useSync } from '@directus/composables';
-import { Field, Filter, Item, ShowSelect } from '@directus/types';
+import { useSync } from '@outroll/composables';
+import { Field, Filter, Item, ShowSelect } from '@outroll/types';
 import { ComponentPublicInstance, inject, ref, Ref, watch, computed, toRefs } from 'vue';
 import { useI18n } from 'vue-i18n';
-import { get } from '@directus/utils';
+import { get } from '@outroll/utils';
 import { useAliasFields } from '@/composables/use-alias-fields';
 import { usePermissionsStore } from '@/stores/permissions';
 import { useUserStore } from '@/stores/user';

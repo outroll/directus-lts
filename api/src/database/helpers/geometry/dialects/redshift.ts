@@ -1,4 +1,4 @@
-import type { Field, RawField } from '@directus/types';
+import type { Field, RawField } from '@outroll/types';
 import type { Knex } from 'knex';
 import { GeometryHelper } from '../types.js';
 

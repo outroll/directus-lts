@@ -1,5 +1,5 @@
 {
-	"name": "@directus/specs",
+	"name": "@outroll/specs",
 	"version": "9.25.2",
 	"description": "OpenAPI Specification of the Directus API",
 	"homepage": "https://directus.io",

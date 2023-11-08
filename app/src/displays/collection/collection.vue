@@ -8,7 +8,7 @@
 
 <script lang="ts">
 import { defineComponent, toRefs } from 'vue';
-import { useCollection } from '@directus/composables';
+import { useCollection } from '@outroll/composables';
 
 export default defineComponent({
 	props: {

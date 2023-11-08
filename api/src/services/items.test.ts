@@ -1,4 +1,4 @@
-import type { CollectionsOverview, NestedDeepQuery } from '@directus/types';
+import type { CollectionsOverview, NestedDeepQuery } from '@outroll/types';
 import knex from 'knex';
 import type { Knex } from 'knex';
 import { createTracker, MockClient, Tracker } from 'knex-mock-client';

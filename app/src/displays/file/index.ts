@@ -1,4 +1,4 @@
-import { defineDisplay } from '@directus/utils';
+import { defineDisplay } from '@outroll/utils';
 import DisplayFile from './file.vue';
 
 export default defineDisplay({

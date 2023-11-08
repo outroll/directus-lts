@@ -1,4 +1,4 @@
-import { defineInterface } from '@directus/extensions-sdk';
+import { defineInterface } from '@outroll/extensions-sdk';
 import InterfaceComponent from './interface.vue';
 
 export default defineInterface({

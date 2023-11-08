@@ -1,4 +1,4 @@
-import { defineDisplay } from '@directus/utils';
+import { defineDisplay } from '@outroll/utils';
 import DisplayLabels from './labels.vue';
 
 export default defineDisplay({
