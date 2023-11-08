@@ -29,7 +29,7 @@
 		"access": "public"
 	},
 	"devDependencies": {
-		"@outroll/tsconfig": "0.0.7",
+		"@outroll/tsconfig": "0.0.8",
 		"@vitest/coverage-c8": "0.29.3",
 		"typescript": "4.9.5",
 		"vitest": "0.29.3"

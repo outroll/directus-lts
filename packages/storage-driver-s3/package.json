@@ -36,7 +36,7 @@
 		"@outroll/utils": "workspace:*"
 	},
 	"devDependencies": {
-		"@outroll/tsconfig": "0.0.7",
+		"@outroll/tsconfig": "0.0.8",
 		"@ngneat/falso": "6.4.0",
 		"@vitest/coverage-c8": "0.29.3",
 		"typescript": "4.9.5",

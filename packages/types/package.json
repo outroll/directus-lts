@@ -29,7 +29,7 @@
 	"devDependencies": {
 		"@outroll/constants": "workspace:*",
 		"@outroll/schema": "workspace:*",
-		"@outroll/tsconfig": "0.0.7",
+		"@outroll/tsconfig": "0.0.8",
 		"@types/express": "4.17.17",
 		"@types/geojson": "7946.0.10",
 		"express": "4.18.2",

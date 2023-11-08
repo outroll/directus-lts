@@ -33,7 +33,7 @@
 		"undici": "5.21.0"
 	},
 	"devDependencies": {
-		"@outroll/tsconfig": "0.0.7",
+		"@outroll/tsconfig": "0.0.8",
 		"@ngneat/falso": "6.4.0",
 		"@types/semver": "7.3.13",
 		"@vitest/coverage-c8": "0.29.3",

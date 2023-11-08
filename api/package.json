@@ -165,7 +165,7 @@
 		"wellknown": "0.5.0"
 	},
 	"devDependencies": {
-		"@outroll/tsconfig": "0.0.7",
+		"@outroll/tsconfig": "0.0.8",
 		"@outroll/types": "workspace:*",
 		"@ngneat/falso": "6.4.0",
 		"@types/async": "3.2.18",
