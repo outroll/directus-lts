@@ -1,6 +1,6 @@
 {
-	"name": "directus",
-	"version": "9.25.4beta",
+	"name": "@outroll/directus",
+	"version": "9.25.5beta",
 	"description": "Directus is a real-time API and App dashboard for managing SQL database content",
 	"type": "module",
 	"keywords": [

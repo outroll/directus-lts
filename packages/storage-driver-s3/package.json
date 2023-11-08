@@ -1,6 +1,6 @@
 {
 	"name": "@outroll/storage-driver-s3",
-	"version": "9.25.4beta",
+	"version": "9.25.5beta",
 	"type": "module",
 	"scripts": {
 		"build": "tsc --build",
