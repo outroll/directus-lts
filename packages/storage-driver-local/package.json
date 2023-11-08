@@ -1,6 +1,6 @@
 {
 	"name": "@outroll/storage-driver-local",
-	"version": "9.25.2",
+	"version": "9.25.4beta",
 	"type": "module",
 	"scripts": {
 		"build": "tsc --build",
