@@ -1,6 +1,6 @@
 {
 	"name": "@outroll/update-check",
-	"version": "9.25.6beta",
+	"version": "9.25.7beta",
 	"type": "module",
 	"scripts": {
 		"build": "tsc --build",
