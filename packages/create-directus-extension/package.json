@@ -1,6 +1,6 @@
 {
-	"name": "create-directus-extension",
-	"version": "9.25.5beta",
+	"name": "@outroll/create-directus-extension",
+	"version": "9.25.6beta",
 	"description": "A small util that will scaffold a Directus extension",
 	"keywords": [
 		"directus",

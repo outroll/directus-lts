@@ -1,6 +1,6 @@
 {
 	"name": "@outroll/specs",
-	"version": "9.25.5beta",
+	"version": "9.25.6beta",
 	"description": "OpenAPI Specification of the Directus API",
 	"homepage": "https://directus.io",
 	"type": "module",
