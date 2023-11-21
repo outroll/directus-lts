@@ -1,6 +1,6 @@
 {
 	"name": "@outroll/extensions-sdk",
-	"version": "9.25.7beta",
+	"version": "1.0.5",
 	"description": "A toolkit to develop extensions to extend Directus",
 	"homepage": "https://directus.io",
 	"type": "module",

@@ -1,6 +1,6 @@
 {
 	"name": "@outroll/storage-driver-azure",
-	"version": "9.25.7beta",
+	"version": "1.0.5",
 	"type": "module",
 	"scripts": {
 		"build": "tsc --build",

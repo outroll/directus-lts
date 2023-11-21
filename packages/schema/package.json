@@ -1,6 +1,6 @@
 {
 	"name": "@outroll/schema",
-	"version": "9.25.7beta",
+	"version": "1.0.5",
 	"description": "Utility for extracting information about existing DB schema",
 	"type": "module",
 	"keywords": [
