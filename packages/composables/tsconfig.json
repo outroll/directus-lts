@@ -1,5 +1,5 @@
 {
-	"extends": "@outroll/tsconfig/node18-esm/tsconfig.json",
+	"extends": "@outroll/tsconfig/node18-esm",
 	"compilerOptions": {
 		"outDir": "dist",
 		"lib": [
