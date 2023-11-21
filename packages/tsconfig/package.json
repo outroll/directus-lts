@@ -12,6 +12,6 @@
 	"license": "MIT",
 	"author": "Rijk van Zanten <rijkvanzanten@me.com>",
 	"exports": {
-		".": "./node18-esm.json"
+		"./node18-esm": "./node18-esm/tsconfig.json"
 	}
 }
