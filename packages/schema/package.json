@@ -45,7 +45,7 @@
 		"knex": "2.4.2"
 	},
 	"devDependencies": {
-		"@outroll/tsconfig": "0.0.8",
+		"@outroll/tsconfig": "workspace:*",
 		"typescript": "4.9.5"
 	},
 	"publishConfig": {

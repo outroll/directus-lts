@@ -58,7 +58,7 @@
 		"rollup-plugin-vue": "6.0.0"
 	},
 	"devDependencies": {
-		"@outroll/tsconfig": "0.0.8",
+		"@outroll/tsconfig": "workspace:*",
 		"@types/fs-extra": "11.0.1",
 		"@types/inquirer": "8.2.6",
 		"@vitest/coverage-c8": "0.29.3",

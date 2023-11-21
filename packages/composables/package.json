@@ -29,7 +29,7 @@
 		"access": "public"
 	},
 	"devDependencies": {
-		"@outroll/tsconfig": "0.0.8",
+		"@outroll/tsconfig": "workspace:*",
 		"@outroll/types": "workspace:*",
 		"@types/lodash-es": "4.17.7",
 		"@vitest/coverage-c8": "0.29.3",
