@@ -1,21 +1,4 @@
 {
-    "name": "@outroll/tsconfig",
-    "version": "0.0.8",
-    "description": "TS Config used in Directus projects",
-    "main": "index.js",
-    "keywords": [
-      "tsconfig",
-      "directus"
-    ],
-    "author": "Rijk van Zanten <rijkvanzanten@me.com>",
-    "license": "MIT",
-    "exports": [
-      "./node18-esm.json"
-    ]
-}
-
-
-{
 	"name": "@outroll/tsconfig",
 	"version": "0.0.8",
 	"description": "TS Config used in Directus projects",
