@@ -5,4 +5,3 @@ packages:
   - docs
   - packages/*
   - tests/*
-  - tsconfig
