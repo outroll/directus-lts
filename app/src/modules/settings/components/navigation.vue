@@ -16,10 +16,10 @@
 			</v-list-item-content>
 		</v-list-item>
 
-		<v-list-item href="https://github.com/directus/directus/releases" class="version">
+		<v-list-item href="https://github.com/directus/outroll/releases" class="version">
 			<v-list-item-icon><v-icon name="directus" /></v-list-item-icon>
 			<v-list-item-content>
-				<v-text-overflow class="version" :text="`Directus ${version}`" />
+				<v-text-overflow class="version" :text="`Directus LTS ${version}`" />
 			</v-list-item-content>
 		</v-list-item>
 	</v-list>
