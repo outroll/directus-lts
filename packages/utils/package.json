@@ -43,8 +43,8 @@
 		"@outroll/constants": "workspace:*",
 		"@outroll/storage": "workspace:*",
 		"date-fns": "2.29.3",
-		"fs-extra": "11.1.0",
-		"joi": "17.8.4",
+		"fs-extra": "11.1.1",
+		"joi": "17.9.1",
 		"lodash-es": "4.17.21",
 		"micromustache": "8.0.3",
 		"tmp": "0.2.1",
@@ -58,9 +58,9 @@
 		"@types/lodash-es": "4.17.7",
 		"@types/node": "18.15.3",
 		"@types/tmp": "0.2.3",
-		"@vitest/coverage-c8": "0.29.3",
-		"concurrently": "7.6.0",
-		"typescript": "4.9.5",
-		"vitest": "0.29.3"
+		"@vitest/coverage-c8": "0.30.1",
+		"concurrently": "8.0.1",
+		"typescript": "5.0.4",
+		"vitest": "0.30.1"
 	}
 }

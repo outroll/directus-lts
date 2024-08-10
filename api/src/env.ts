@@ -38,6 +38,10 @@ const allowedEnvironmentVars = [
 	'KEY',
 	'SECRET',
 	'ACCESS_TOKEN_TTL',
+	'ACCESS_TOKEN_COOKIE_DOMAIN',
+	'ACCESS_TOKEN_COOKIE_SECURE',
+	'ACCESS_TOKEN_COOKIE_SAME_SITE',
+	'ACCESS_TOKEN_COOKIE_NAME',
 	'REFRESH_TOKEN_TTL',
 	'REFRESH_TOKEN_COOKIE_DOMAIN',
 	'REFRESH_TOKEN_COOKIE_SECURE',
@@ -54,6 +58,7 @@ const allowedEnvironmentVars = [
 	'HSTS_.+',
 	// hashing
 	'HASH_.+',
+	'X_POWERED_BY_ENABLED',
 	// cors
 	'CORS_ENABLED',
 	'CORS_ORIGIN',
@@ -147,6 +152,7 @@ const allowedEnvironmentVars = [
 	'AUTH_.+_GROUP_SCOPE',
 	'AUTH_.+_IDP.+',
 	'AUTH_.+_SP.+',
+	'AUTH_.+_REDIRECT_ALLOW_LIST',
 	// extensions
 	'PACKAGE_FILE_LOCATION',
 	'EXTENSIONS_PATH',
@@ -223,6 +229,9 @@ const defaults: Record<string, any> = {
 	RATE_LIMITER_GLOBAL_STORE: 'memory',
 
 	ACCESS_TOKEN_TTL: '15m',
+	ACCESS_TOKEN_COOKIE_SECURE: false,
+	ACCESS_TOKEN_COOKIE_SAME_SITE: 'lax',
+	ACCESS_TOKEN_COOKIE_NAME: 'directus_access_token',
 	REFRESH_TOKEN_TTL: '7d',
 	REFRESH_TOKEN_COOKIE_SECURE: false,
 	REFRESH_TOKEN_COOKIE_SAME_SITE: 'lax',
@@ -232,6 +241,8 @@ const defaults: Record<string, any> = {
 	SERVER_SHUTDOWN_TIMEOUT: 1000,
 
 	ROOT_REDIRECT: './admin',
+
+	X_POWERED_BY_ENABLED: true,
 
 	CORS_ENABLED: false,
 	CORS_ORIGIN: false,

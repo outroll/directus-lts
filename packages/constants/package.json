@@ -28,7 +28,7 @@
 	},
 	"devDependencies": {
 		"@outroll/tsconfig": "workspace:*",
-		"typescript": "4.9.5"
+		"typescript": "5.0.4"
 	},
 	"dependencies": {
 		"zod": "3.21.4"
