@@ -1,0 +1,7 @@
+{
+	"extends": "@outroll/tsconfig/node22",
+	"compilerOptions": {
+		"outDir": "dist"
+	},
+	"include": ["src"]
+}

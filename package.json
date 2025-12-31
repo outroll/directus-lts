@@ -1,6 +1,6 @@
 {
 	"name": "directus9-monorepo",
-	"private": true,
+	"private": false,
 	"scripts": {
 		"build": "pnpm --recursive --filter '!docs' run build",
 		"format": "prettier --write \"**/*.{md,y?(a)ml,json}\"",
@@ -21,7 +21,7 @@
 	},
 	"packageManager": "pnpm@8.3.1",
 	"engines": {
-		"node": ">=22",
+		"node": ">=23",
 		"pnpm": ">=8.1.0"
 	},
 	"pnpm": {
