@@ -11,7 +11,7 @@ const { name, version } = JSON.parse(readFileSync(apiPkgPath, 'utf8')) as {
 	version: string;
 };
 
-const mainPkgPath = resolve(dirname(apiPkgPath), '../../../../../../package.json');
+const mainPkgPath = resolve(dirname(apiPkgPath), '../../../../../package.json');
 const mainVersion = existsSync(mainPkgPath) ? JSON.parse(readFileSync(mainPkgPath, 'utf8')).version : null;
 
 export { name, version, mainVersion };
