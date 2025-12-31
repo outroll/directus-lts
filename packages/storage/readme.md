@@ -1,3 +1,3 @@
-# `@directus/storage`
+# `@outroll/storage`
 
 Storage abstraction for Directus

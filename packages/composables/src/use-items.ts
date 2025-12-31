@@ -2,7 +2,8 @@ import type { Item, Query } from '@outroll/types';
 import { getEndpoint, moveInArray } from '@outroll/utils';
 import axios from 'axios';
 import { isEqual, throttle } from 'lodash-es';
-import { ComputedRef, Ref, WritableComputedRef, computed, ref, unref, watch } from 'vue';
+import type { ComputedRef, Ref, WritableComputedRef } from 'vue';
+import { computed, ref, unref, watch } from 'vue';
 import { useCollection } from './use-collection.js';
 import { useApi } from './use-system.js';
 
@@ -34,7 +35,12 @@ export type ComputedQuery = {
 	page: Ref<Query['page']> | WritableComputedRef<Query['page']>;
 };
 
-export function useItems(collection: Ref<string | null>, query: ComputedQuery): UsableItems {
+// ** bypass_collections_calls: [issues-33] we allow directus_collections to be read as items for m2m collection visualization
+export function useItems(
+	collection: Ref<string | null>,
+	query: ComputedQuery,
+	bypass_collections_calls = false
+): UsableItems {
 	const api = useApi();
 	const { primaryKeyField } = useCollection(collection);
 
@@ -42,7 +48,7 @@ export function useItems(collection: Ref<string | null>, query: ComputedQuery): 
 
 	const endpoint = computed(() => {
 		if (!collection.value) return null;
-		return getEndpoint(collection.value);
+		return getEndpoint(collection.value, bypass_collections_calls);
 	});
 
 	const items = ref<Item[]>([]);

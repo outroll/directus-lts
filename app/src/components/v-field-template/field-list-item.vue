@@ -21,7 +21,7 @@
 
 <script setup lang="ts">
 import { FieldTree } from './types';
-import formatTitle from '@directus/format-title';
+import formatTitle from '@outroll/format-title';
 
 interface Props {
 	field: FieldTree;

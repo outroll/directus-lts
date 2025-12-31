@@ -1,6 +1,6 @@
 /**
- * @NOTE This is copied from @directus/utils. Once the tests are ESM too, this needs to be removed
- * in favor of using @directus/utils
+ * @NOTE This is copied from @outroll/utils. Once the tests are ESM too, this needs to be removed
+ * in favor of using @outroll/utils
  *
  * @TODO
  */

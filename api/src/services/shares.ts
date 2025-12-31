@@ -78,6 +78,23 @@ export class SharesService extends ItemsService {
 			.update({ times_used: record.share_times_used + 1 })
 			.where('id', record.share_id);
 
+		const refreshToken = nanoid(64);
+		const refreshTokenExpiration = new Date(Date.now() + getMilliseconds(env['REFRESH_TOKEN_TTL'], 0));
+
+		const sessionId = nanoid(64);
+
+		await this.knex('directus_sessions').insert({
+			token: refreshToken,
+			expires: refreshTokenExpiration,
+			ip: this.accountability?.ip,
+			user_agent: this.accountability?.userAgent,
+			origin: this.accountability?.origin,
+			share: record.share_id,
+			session_id: sessionId,
+		});
+
+		await this.knex('directus_sessions').delete().where('expires', '<', new Date());
+
 		const tokenPayload: DirectusTokenPayload = {
 			app_access: false,
 			admin_access: false,
@@ -87,26 +104,13 @@ export class SharesService extends ItemsService {
 				item: record.share_item,
 				collection: record.share_collection,
 			},
+			refresh_token: refreshToken,
 		};
 
 		const accessToken = jwt.sign(tokenPayload, env['SECRET'] as string, {
 			expiresIn: env['ACCESS_TOKEN_TTL'],
 			issuer: 'directus',
 		});
-
-		const refreshToken = nanoid(64);
-		const refreshTokenExpiration = new Date(Date.now() + getMilliseconds(env['REFRESH_TOKEN_TTL'], 0));
-
-		await this.knex('directus_sessions').insert({
-			token: refreshToken,
-			expires: refreshTokenExpiration,
-			ip: this.accountability?.ip,
-			user_agent: this.accountability?.userAgent,
-			origin: this.accountability?.origin,
-			share: record.share_id,
-		});
-
-		await this.knex('directus_sessions').delete().where('expires', '<', new Date());
 
 		return {
 			accessToken,

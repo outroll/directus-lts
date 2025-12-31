@@ -1,5 +1,6 @@
 import cookieParser from 'cookie-parser';
-import express, { Request, RequestHandler, Response } from 'express';
+import type { Request, RequestHandler, Response } from 'express';
+import express from 'express';
 import type { ServerResponse } from 'http';
 import { merge } from 'lodash-es';
 import { readFile } from 'node:fs/promises';
@@ -142,10 +143,12 @@ export default async function createApp(): Promise<express.Application> {
 
 	app.use(expressLogger);
 
-	app.use((_req, res, next) => {
-		res.setHeader('X-Powered-By', 'Directus');
-		next();
-	});
+	if (env['X_POWERED_BY_ENABLED'] === true) {
+		app.use((_req, res, next) => {
+			res.setHeader('X-Powered-By', 'Directus');
+			next();
+		});
+	}
 
 	if (env['CORS_ENABLED'] === true) {
 		app.use(cors);

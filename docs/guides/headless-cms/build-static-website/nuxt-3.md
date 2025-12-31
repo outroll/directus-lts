@@ -31,13 +31,13 @@ Open your terminal and run the following commands to create a new Nuxt project a
 npx nuxt init my-website
 cd my-website
 npm install
-npm install @directus/sdk
+npm install @outroll/sdk
 ```
 
 Open `my-website` in your code editor and type `npm run dev` in your terminal to start the Nuxt development server and
 open `http://localhost:3000` in your browser.
 
-## Create Plugin For @directus/sdk
+## Create Plugin For @outroll/sdk
 
 To expose an npm package available globally in your Nuxt project you must create a plugin. Create a new directory called
 `plugins` and a new file called `directus.js` inside of it.

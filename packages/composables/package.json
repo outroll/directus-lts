@@ -1,6 +1,6 @@
 {
 	"name": "@outroll/composables",
-	"version": "1.0.6",
+	"version": "10.0.0",
 	"type": "module",
 	"scripts": {
 		"build": "tsc --build",
@@ -10,10 +10,10 @@
 	"description": "Shared Vue composables for Directus use",
 	"repository": {
 		"type": "git",
-		"url": "https://github.com/directus/directus.git",
+		"url": "https://github.com/outroll/directus-lts.git",
 		"directory": "packages/composables"
 	},
-	"funding": "https://github.com/directus/directus?sponsor=1",
+	"funding": "https://github.com/outroll/directus-lts?sponsor=1",
 	"license": "GPL-3.0",
 	"author": "Rijk van Zanten <rijkvanzanten@me.com>",
 	"exports": {
@@ -29,12 +29,12 @@
 		"access": "public"
 	},
 	"devDependencies": {
-		"@outroll/tsconfig": "workspace:*",
-		"@outroll/types": "workspace:*",
 		"@types/lodash-es": "4.17.7",
 		"@vitest/coverage-c8": "0.30.1",
-		"@vue/test-utils": "2.3.2",
-		"axios": "^1.7.2",
+		"@vue/test-utils": "2.4.6",
+		"@outroll/tsconfig": "2.0.0",
+		"@outroll/types": "workspace:*",
+		"axios": "^1.12.0",
 		"typescript": "5.0.4",
 		"vitest": "0.30.1"
 	},
@@ -42,7 +42,7 @@
 		"@outroll/constants": "workspace:*",
 		"@outroll/utils": "workspace:*",
 		"lodash-es": "4.17.21",
-		"nanoid": "4.0.2",
+		"nanoid": "5.0.9",
 		"vue": "3.2.47"
 	}
 }

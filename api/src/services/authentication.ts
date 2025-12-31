@@ -9,12 +9,7 @@ import { DEFAULT_AUTH_PROVIDER } from '../constants.js';
 import getDatabase from '../database/index.js';
 import emitter from '../emitter.js';
 import env from '../env.js';
-import {
-	InvalidCredentialsException,
-	InvalidOTPException,
-	InvalidProviderException,
-	UserSuspendedException,
-} from '../exceptions/index.js';
+import { InvalidCredentialsException, InvalidOTPException, UserSuspendedException } from '../exceptions/index.js';
 import { createRateLimiter } from '../rate-limiter.js';
 import type { AbstractServiceOptions, DirectusTokenPayload, LoginResult, Session, User } from '../types/index.js';
 import { getMilliseconds } from '../utils/get-milliseconds.js';
@@ -118,19 +113,11 @@ export class AuthenticationService {
 			);
 		};
 
-		if (user?.status !== 'active') {
+		if (user?.status !== 'active' || user.provider.toLowerCase() !== providerName.toLowerCase()) {
 			emitStatus('fail');
 
-			if (user?.status === 'suspended') {
-				await stall(STALL_TIME, timeStart);
-				throw new UserSuspendedException();
-			} else {
-				await stall(STALL_TIME, timeStart);
-				throw new InvalidCredentialsException();
-			}
-		} else if (user.provider !== providerName) {
 			await stall(STALL_TIME, timeStart);
-			throw new InvalidProviderException();
+			throw new InvalidCredentialsException();
 		}
 
 		const settingsService = new SettingsService({
@@ -181,11 +168,27 @@ export class AuthenticationService {
 			}
 		}
 
+		const refreshToken = nanoid(64);
+		const refreshTokenExpiration = new Date(Date.now() + getMilliseconds(env['REFRESH_TOKEN_TTL'], 0));
+
+		const sessionId = nanoid(64);
+
+		await this.knex('directus_sessions').insert({
+			token: refreshToken,
+			user: user.id,
+			expires: refreshTokenExpiration,
+			ip: this.accountability?.ip,
+			user_agent: this.accountability?.userAgent,
+			origin: this.accountability?.origin,
+			session_id: sessionId,
+		});
+
 		const tokenPayload = {
 			id: user.id,
 			role: user.role,
 			app_access: user.app_access,
 			admin_access: user.admin_access,
+			refresh_token: refreshToken,
 		};
 
 		const customClaims = await emitter.emitFilter(
@@ -209,18 +212,6 @@ export class AuthenticationService {
 			issuer: 'directus',
 		});
 
-		const refreshToken = nanoid(64);
-		const refreshTokenExpiration = new Date(Date.now() + getMilliseconds(env['REFRESH_TOKEN_TTL'], 0));
-
-		await this.knex('directus_sessions').insert({
-			token: refreshToken,
-			user: user.id,
-			expires: refreshTokenExpiration,
-			ip: this.accountability?.ip,
-			user_agent: this.accountability?.userAgent,
-			origin: this.accountability?.origin,
-		});
-
 		await this.knex('directus_sessions').delete().where('expires', '<', new Date());
 
 		if (this.accountability) {
@@ -232,6 +223,7 @@ export class AuthenticationService {
 				origin: this.accountability.origin,
 				collection: 'directus_users',
 				item: user.id,
+				session_id: sessionId,
 			});
 		}
 
@@ -265,6 +257,8 @@ export class AuthenticationService {
 		const record = await this.knex
 			.select({
 				session_expires: 's.expires',
+				session_fallback_token: 's.fallback_token',
+				session_id: 's.session_id',
 				user_id: 'u.id',
 				user_first_name: 'u.first_name',
 				user_last_name: 'u.last_name',
@@ -337,11 +331,65 @@ export class AuthenticationService {
 			});
 		}
 
+		// Clean up expired sessions for this user first
+		await this.knex('directus_sessions')
+			.delete()
+			.where('user', '=', record.user_id)
+			.andWhere('expires', '<', new Date());
+
+		let newRefreshToken = record.session_fallback_token ?? nanoid(64);
+		const refreshTokenExpiration = new Date(Date.now() + getMilliseconds(env['REFRESH_TOKEN_TTL'], 0));
+
+		const sessionId = record.session_id ?? nanoid(64);
+
+		// If a fallback session already exists, just update its expiration
+		if (record.session_fallback_token) {
+			await this.knex('directus_sessions')
+				.update({
+					expires: refreshTokenExpiration,
+				})
+				.where({ token: newRefreshToken });
+		} else {
+			// Otherwise, create the race condition protection mechanism
+			const overlapDuration = getMilliseconds(env['REFRESH_TOKEN_OVERLAP_DURATION'], 10000);
+
+			// Atomic protection: only the first request can create the fallback_token
+			const sessionUpdated = await this.knex('directus_sessions')
+				.update({
+					fallback_token: newRefreshToken,
+					expires: new Date(Date.now() + overlapDuration), // Current session expires after the overlapDuration
+				})
+				.where({ token: refreshToken, fallback_token: null }); // Atomic condition to prevent race conditions
+
+			if (sessionUpdated === 0) {
+				// Another request already created the fallback_token, retrieve it
+				const existingFallback = await this.knex('directus_sessions')
+					.select('fallback_token')
+					.where({ token: refreshToken })
+					.first();
+
+				newRefreshToken = existingFallback.fallback_token;
+			} else {
+				// We successfully created the fallback_token, create the new session
+				await this.knex('directus_sessions').insert({
+					token: newRefreshToken,
+					user: record.user_id,
+					share: record.share_id,
+					expires: refreshTokenExpiration,
+					ip: this.accountability?.ip,
+					user_agent: this.accountability?.userAgent,
+					origin: this.accountability?.origin,
+					session_id: sessionId,
+				});
+			}
+		}
+
 		const tokenPayload: DirectusTokenPayload = {
 			id: record.user_id,
 			role: record.role_id,
 			app_access: record.role_app_access,
 			admin_access: record.role_admin_access,
+			refresh_token: newRefreshToken,
 		};
 
 		if (record.share_id) {
@@ -380,16 +428,6 @@ export class AuthenticationService {
 			issuer: 'directus',
 		});
 
-		const newRefreshToken = nanoid(64);
-		const refreshTokenExpiration = new Date(Date.now() + getMilliseconds(env['REFRESH_TOKEN_TTL'], 0));
-
-		await this.knex('directus_sessions')
-			.update({
-				token: newRefreshToken,
-				expires: refreshTokenExpiration,
-			})
-			.where({ token: refreshToken });
-
 		if (record.user_id) {
 			await this.knex('directus_users').update({ last_access: new Date() }).where({ id: record.user_id });
 		}
@@ -427,7 +465,12 @@ export class AuthenticationService {
 			const provider = getAuthProvider(user.provider);
 			await provider.logout(clone(user));
 
-			await this.knex.delete().from('directus_sessions').where('token', refreshToken);
+			// Remove all related sessions (main and fallback)
+			await this.knex
+				.delete()
+				.from('directus_sessions')
+				.where('token', refreshToken)
+				.orWhere('fallback_token', refreshToken);
 		}
 	}
 

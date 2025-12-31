@@ -1,7 +1,8 @@
-import formatTitle from '@directus/format-title';
+import formatTitle from '@outroll/format-title';
 import { toArray } from '@outroll/utils';
 import encodeURL from 'encodeurl';
 import exif from 'exif-reader';
+import type { IccProfile } from 'icc';
 import { parse as parseIcc } from 'icc';
 import { clone, pick } from 'lodash-es';
 import { extension } from 'mime-types';
@@ -166,7 +167,7 @@ export class FilesService extends ItemsService {
 						exif?: Record<string, unknown>;
 						gps?: Record<string, unknown>;
 						interop?: Record<string, unknown>;
-						icc?: Record<string, unknown>;
+						icc?: IccProfile;
 						iptc?: Record<string, unknown>;
 						xmp?: Record<string, unknown>;
 					} = {};

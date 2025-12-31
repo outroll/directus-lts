@@ -7,8 +7,8 @@ readTime: 3 min read
 
 ::: info Non-Docker Guides
 
-We only publish and maintain self hosting guides using Docker as this removes many
-environment-specific configuration problems. If you can't or don't want to use Docker, we also publish an
+We only publish and maintain self hosting guides using Docker as this removes many environment-specific configuration
+problems. If you can't or don't want to use Docker, we also publish an
 [npm package](https://www.npmjs.com/package/directus) without guides.
 
 :::
@@ -60,8 +60,8 @@ Containers are ephemeral, and this means that whenever you stop a container, all
 be removed [unless you persist them](https://docs.docker.com/storage) when creating your container.
 
 Directus image by default
-[will use the following locations](https://github.com/directus/directus/blob/main/docker/Dockerfile#L56-L60) for data
-persistence (note that these can be changed through environment variables)
+[will use the following locations](https://github.com/outroll/directus-lts/blob/main/docker/Dockerfile#L56-L60) for
+data persistence (note that these can be changed through environment variables)
 
 - `/directus/uploads` for uploads
 - `/directus/database` (only when using SQLite and not configured to a different folder)
@@ -159,29 +159,6 @@ docker-compose up -d
 
 The images will be pulled and the containers recreated. Migrations will happen automatically so once the containers have
 started you will be on the latest version (or the version you specified).
-
-### Adding packages to use in Flows scripts
-
-If you need third-party packages in a script of one of your flows, you can add these lines in the `directus` service of your `docker-compose.yml` file :
-```yaml
-    command: >
-      sh -c "
-        npm install moment uuid
-        npx directus bootstrap && npx directus start
-      "
-```
-
-:::tip Don't forget to provide `FLOWS_EXEC_ALLOWED_MODULES` variable
-
-In your `docker-compose.yml` file, you will need to add :
-```diff
-    environment:
-+     FLOWS_EXEC_ALLOWED_MODULES=array:moment,uuid
-```
-For more information, please see the config section on [Flows](https://docs.directus.io/self-hosted/config-options.html#flows)
-
-:::
-
 
 ## Supported Databases
 

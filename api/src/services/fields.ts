@@ -1,6 +1,6 @@
+import { KNEX_TYPES, REGEX_BETWEEN_PARENS } from '@outroll/constants';
 import type { Column, SchemaInspector } from '@outroll/schema';
 import { createInspector } from '@outroll/schema';
-import { KNEX_TYPES, REGEX_BETWEEN_PARENS } from '@outroll/constants';
 import type { Accountability, Field, FieldMeta, RawField, SchemaOverview, Type } from '@outroll/types';
 import { addFieldFlag, toArray } from '@outroll/utils';
 import type Keyv from 'keyv';
@@ -8,7 +8,8 @@ import type { Knex } from 'knex';
 import { isEqual, isNil } from 'lodash-es';
 import { clearSystemCache, getCache } from '../cache.js';
 import { ALIAS_TYPES } from '../constants.js';
-import { getHelpers, Helpers } from '../database/helpers/index.js';
+import type { Helpers } from '../database/helpers/index.js';
+import { getHelpers } from '../database/helpers/index.js';
 import getDatabase, { getSchemaInspector } from '../database/index.js';
 import { systemFieldRows } from '../database/system-data/fields/index.js';
 import emitter from '../emitter.js';

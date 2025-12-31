@@ -1,5 +1,6 @@
 import type { Field } from '@outroll/types';
-import { Ref, computed, ComputedRef } from 'vue';
+import type { ComputedRef, Ref } from 'vue';
+import { computed } from 'vue';
 
 export function useFilterFields<T extends string>(
 	fields: Ref<Field[]>,

@@ -114,7 +114,7 @@ export default {
 ## Accessing Internal Systems
 
 To access internal systems like the API or the stores, you can use the `useApi()` and `useStores()` composables exported
-by the `@directus/extensions-sdk` package. They can be used inside a `setup()` function like this:
+by the `@outroll/extensions-sdk` package. They can be used inside a `setup()` function like this:
 
 ```js
 import { useApi, useStores } from '@outroll/extensions-sdk';

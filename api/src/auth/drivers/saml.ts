@@ -3,12 +3,21 @@ import { BaseException } from '@outroll/exceptions';
 import express, { Router } from 'express';
 import * as samlify from 'samlify';
 import { getAuthProvider } from '../../auth.js';
-import { COOKIE_OPTIONS } from '../../constants.js';
+import {
+	ACCESS_COOKIE_CLEAR_OPTIONS,
+	ACCESS_COOKIE_OPTIONS,
+	REFRESH_COOKIE_CLEAR_OPTIONS,
+	REFRESH_COOKIE_OPTIONS,
+} from '../../constants.js';
 import getDatabase from '../../database/index.js';
 import emitter from '../../emitter.js';
 import env from '../../env.js';
 import { RecordNotUniqueException } from '../../exceptions/database/record-not-unique.js';
-import { InvalidCredentialsException, InvalidProviderException } from '../../exceptions/index.js';
+import {
+	InvalidCredentialsException,
+	InvalidProviderException,
+	InvalidPayloadException,
+} from '../../exceptions/index.js';
 import logger from '../../logger.js';
 import { respond } from '../../middleware/respond.js';
 import { AuthenticationService } from '../../services/authentication.js';
@@ -16,6 +25,7 @@ import { UsersService } from '../../services/users.js';
 import type { AuthDriverOptions, User } from '../../types/index.js';
 import asyncHandler from '../../utils/async-handler.js';
 import { getConfigFromEnv } from '../../utils/get-config-from-env.js';
+import { isRedirectAllowedOnLogin } from '../../utils/is-redirect-allowed-on-login.js';
 import { LocalAuthDriver } from './local.js';
 
 // Register the samlify schema validator
@@ -120,7 +130,13 @@ export function createSAMLAuthRouter(providerName: string) {
 			const parsedUrl = new URL(url);
 
 			if (req.query['redirect']) {
-				parsedUrl.searchParams.append('RelayState', req.query['redirect'] as string);
+				const redirect = req.query['redirect'] as string;
+
+				if (isRedirectAllowedOnLogin(redirect, providerName) === false) {
+					throw new InvalidPayloadException(`URL "${redirect}" can't be used to redirect after login`);
+				}
+
+				parsedUrl.searchParams.append('RelayState', redirect);
 			}
 
 			return res.redirect(parsedUrl.toString());
@@ -135,12 +151,16 @@ export function createSAMLAuthRouter(providerName: string) {
 
 			const authService = new AuthenticationService({ accountability: req.accountability, schema: req.schema });
 
+			if (req.cookies[env['ACCESS_TOKEN_COOKIE_NAME']]) {
+				res.clearCookie(env['ACCESS_TOKEN_COOKIE_NAME'], ACCESS_COOKIE_CLEAR_OPTIONS);
+			}
+
 			if (req.cookies[env['REFRESH_TOKEN_COOKIE_NAME']]) {
 				const currentRefreshToken = req.cookies[env['REFRESH_TOKEN_COOKIE_NAME']];
 
 				if (currentRefreshToken) {
 					await authService.logout(currentRefreshToken);
-					res.clearCookie(env['REFRESH_TOKEN_COOKIE_NAME'], COOKIE_OPTIONS);
+					res.clearCookie(env['REFRESH_TOKEN_COOKIE_NAME'], REFRESH_COOKIE_CLEAR_OPTIONS);
 				}
 			}
 
@@ -170,7 +190,8 @@ export function createSAMLAuthRouter(providerName: string) {
 				};
 
 				if (relayState) {
-					res.cookie(env['REFRESH_TOKEN_COOKIE_NAME'], refreshToken, COOKIE_OPTIONS);
+					res?.cookie(env['ACCESS_TOKEN_COOKIE_NAME'], accessToken, ACCESS_COOKIE_OPTIONS);
+					res?.cookie(env['REFRESH_TOKEN_COOKIE_NAME'], refreshToken, REFRESH_COOKIE_OPTIONS);
 					return res.redirect(relayState);
 				}
 

@@ -1,14 +1,15 @@
 import type { Accountability, Query, SchemaOverview } from '@outroll/types';
-import { format, parseISO, isValid } from 'date-fns';
 import { parseJSON, toArray } from '@outroll/utils';
+import { format, isValid, parseISO } from 'date-fns';
 import flat from 'flat';
 import Joi from 'joi';
 import type { Knex } from 'knex';
 import { clone, cloneDeep, isNil, isObject, isPlainObject, omit, pick } from 'lodash-es';
 import { v4 as uuid } from 'uuid';
 import { parse as wktToGeoJSON } from 'wellknown';
+import type { Helpers } from '../database/helpers/index.js';
+import { getHelpers } from '../database/helpers/index.js';
 import getDatabase from '../database/index.js';
-import { getHelpers, Helpers } from '../database/helpers/index.js';
 import { ForbiddenException, InvalidPayloadException } from '../exceptions/index.js';
 import type {
 	AbstractServiceOptions,
@@ -147,9 +148,12 @@ export class PayloadService {
 
 	processValues(action: Action, payloads: Partial<Item>[]): Promise<Partial<Item>[]>;
 	processValues(action: Action, payload: Partial<Item>): Promise<Partial<Item>>;
+	processValues(action: Action, payloads: Partial<Item>[], aliasMap: Record<string, string>): Promise<Partial<Item>[]>;
+	processValues(action: Action, payload: Partial<Item>, aliasMap: Record<string, string>): Promise<Partial<Item>>;
 	async processValues(
 		action: Action,
-		payload: Partial<Item> | Partial<Item>[]
+		payload: Partial<Item> | Partial<Item>[],
+		aliasMap: Record<string, string> = {}
 	): Promise<Partial<Item> | Partial<Item>[]> {
 		const processedPayload = toArray(payload);
 
@@ -160,6 +164,16 @@ export class PayloadService {
 		let specialFieldsInCollection = Object.entries(this.schema.collections[this.collection]!.fields).filter(
 			([_name, field]) => field.special && field.special.length > 0
 		);
+
+		const aliasEntries = Object.entries(aliasMap);
+
+		for (const [name, field] of specialFieldsInCollection) {
+			for (const [aliasName, fieldName] of aliasEntries) {
+				if (fieldName === name) {
+					specialFieldsInCollection.push([aliasName, { ...field, field: aliasName }]);
+				}
+			}
+		}
 
 		if (action === 'read') {
 			specialFieldsInCollection = specialFieldsInCollection.filter(([name]) => {

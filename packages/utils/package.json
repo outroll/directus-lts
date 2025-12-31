@@ -1,6 +1,6 @@
 {
 	"name": "@outroll/utils",
-	"version": "1.0.6",
+	"version": "10.0.0",
 	"type": "module",
 	"scripts": {
 		"build": "tsc --project browser/tsconfig.json && tsc --project node/tsconfig.json && tsc --project shared/tsconfig.json",
@@ -10,10 +10,10 @@
 	"description": "Utilities shared between the Directus packages",
 	"repository": {
 		"type": "git",
-		"url": "https://github.com/directus/directus.git",
+		"url": "https://github.com/outroll/directus-lts.git",
 		"directory": "packages/utils"
 	},
-	"funding": "https://github.com/directus/directus?sponsor=1",
+	"funding": "https://github.com/outroll/directus-lts?sponsor=1",
 	"license": "GPL-3.0",
 	"author": "Rijk van Zanten <rijkvanzanten@me.com>",
 	"exports": {
@@ -47,16 +47,16 @@
 		"joi": "17.9.1",
 		"lodash-es": "4.17.21",
 		"micromustache": "8.0.3",
-		"tmp": "0.2.1",
+		"tmp": "0.2.4",
 		"vue": "3.2.47"
 	},
 	"devDependencies": {
-		"@outroll/tsconfig": "workspace:*",
+		"@outroll/tsconfig": "2.0.0",
 		"@outroll/types": "workspace:*",
 		"@ngneat/falso": "6.4.0",
 		"@types/fs-extra": "11.0.1",
 		"@types/lodash-es": "4.17.7",
-		"@types/node": "18.15.3",
+		"@types/node": "18.15.13",
 		"@types/tmp": "0.2.3",
 		"@vitest/coverage-c8": "0.30.1",
 		"concurrently": "8.0.1",

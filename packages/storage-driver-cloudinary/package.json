@@ -1,19 +1,19 @@
 {
 	"name": "@outroll/storage-driver-cloudinary",
-	"version": "1.0.6",
+	"version": "10.0.0",
 	"type": "module",
 	"scripts": {
 		"build": "tsc --build",
 		"dev": "tsc --watch",
 		"test": "vitest --watch=false"
 	},
-	"description": "Cloudinary file storage abstraction for `@directus/storage`",
+	"description": "Cloudinary file storage abstraction for `@outroll/storage`",
 	"repository": {
 		"type": "git",
-		"url": "https://github.com/directus/directus.git",
+		"url": "https://github.com/outroll/directus-lts.git",
 		"directory": "packages/storage-driver-cloudinary"
 	},
-	"funding": "https://github.com/directus/directus?sponsor=1",
+	"funding": "https://github.com/outroll/directus-lts?sponsor=1",
 	"license": "GPL-3.0",
 	"author": "Rijk van Zanten <rijkvanzanten@me.com>",
 	"exports": {
@@ -32,12 +32,12 @@
 		"@outroll/storage": "workspace:*",
 		"@outroll/utils": "workspace:*",
 		"p-queue": "7.3.4",
-		"undici": "5.22.0"
+		"undici": "5.29.0"
 	},
 	"devDependencies": {
-		"@outroll/tsconfig": "workspace:*",
 		"@ngneat/falso": "6.4.0",
 		"@vitest/coverage-c8": "0.30.1",
+		"@outroll/tsconfig": "2.0.0",
 		"typescript": "5.0.4",
 		"vitest": "0.30.1"
 	}

@@ -150,7 +150,7 @@ export class ItemsService<Item extends AnyItem = AnyItem> implements AbstractSer
 					: payload;
 
 			const payloadWithPresets = this.accountability
-				? authorizationService.validatePayload('create', this.collection, payloadAfterHooks)
+				? await authorizationService.validatePayload('create', this.collection, payloadAfterHooks)
 				: payloadAfterHooks;
 
 			if (opts.preMutationException) {
@@ -230,6 +230,7 @@ export class ItemsService<Item extends AnyItem = AnyItem> implements AbstractSer
 					user_agent: this.accountability!.userAgent,
 					origin: this.accountability!.origin,
 					item: primaryKey,
+					session_id: this.accountability!.session_id,
 				});
 
 				// If revisions are tracked, create revisions record
@@ -598,7 +599,7 @@ export class ItemsService<Item extends AnyItem = AnyItem> implements AbstractSer
 		}
 
 		const payloadWithPresets = this.accountability
-			? authorizationService.validatePayload('update', this.collection, payloadAfterHooks)
+			? await authorizationService.validatePayload('update', this.collection, payloadAfterHooks, keys)
 			: payloadAfterHooks;
 
 		if (opts.preMutationException) {
@@ -667,6 +668,7 @@ export class ItemsService<Item extends AnyItem = AnyItem> implements AbstractSer
 						user_agent: this.accountability!.userAgent,
 						origin: this.accountability!.origin,
 						item: key,
+						session_id: this.accountability?.session_id,
 					})),
 					{ bypassLimits: true }
 				);
@@ -901,6 +903,7 @@ export class ItemsService<Item extends AnyItem = AnyItem> implements AbstractSer
 						user_agent: this.accountability!.userAgent,
 						origin: this.accountability!.origin,
 						item: key,
+						session_id: this.accountability!.session_id,
 					})),
 					{ bypassLimits: true }
 				);

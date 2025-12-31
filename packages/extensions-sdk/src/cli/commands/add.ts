@@ -15,7 +15,7 @@ import type {
 import { isIn, isTypeIn } from '@outroll/utils';
 import { pathToRelativeUrl } from '@outroll/utils/node';
 import chalk from 'chalk';
-import execa from 'execa';
+import { execa } from 'execa';
 import fse from 'fs-extra';
 import inquirer from 'inquirer';
 import ora from 'ora';

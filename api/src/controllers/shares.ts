@@ -1,6 +1,6 @@
 import express from 'express';
 import Joi from 'joi';
-import { COOKIE_OPTIONS, UUID_REGEX } from '../constants.js';
+import { ACCESS_COOKIE_OPTIONS, REFRESH_COOKIE_OPTIONS, UUID_REGEX } from '../constants.js';
 import env from '../env.js';
 import { ForbiddenException, InvalidPayloadException } from '../exceptions/index.js';
 import { respond } from '../middleware/respond.js';
@@ -36,7 +36,8 @@ router.post(
 
 		const { accessToken, refreshToken, expires } = await service.login(req.body);
 
-		res.cookie(env['REFRESH_TOKEN_COOKIE_NAME'], refreshToken, COOKIE_OPTIONS);
+		res?.cookie(env['ACCESS_TOKEN_COOKIE_NAME'], accessToken, ACCESS_COOKIE_OPTIONS);
+		res?.cookie(env['REFRESH_TOKEN_COOKIE_NAME'], refreshToken, REFRESH_COOKIE_OPTIONS);
 
 		res.locals['payload'] = { data: { access_token: accessToken, expires } };
 

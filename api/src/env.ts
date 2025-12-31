@@ -47,6 +47,7 @@ const allowedEnvironmentVars = [
 	'REFRESH_TOKEN_COOKIE_SECURE',
 	'REFRESH_TOKEN_COOKIE_SAME_SITE',
 	'REFRESH_TOKEN_COOKIE_NAME',
+	'REFRESH_TOKEN_OVERLAP_DURATION',
 	'LOGIN_STALL_TIME',
 	'PASSWORD_RESET_URL_ALLOW_LIST',
 	'USER_INVITE_URL_ALLOW_LIST',
@@ -195,8 +196,9 @@ const allowedEnvironmentVars = [
 	'RELATIONAL_BATCH_SIZE',
 	'EXPORT_BATCH_SIZE',
 	// flows
-	'FLOWS_EXEC_ALLOWED_MODULES',
 	'FLOWS_ENV_ALLOW_LIST',
+	'FLOWS_SCRIPT_MAX_MEMORY',
+	'FLOWS_SCRIPT_EXEC_TIMEOUT',
 ].map((name) => new RegExp(`^${name}$`));
 
 const acceptedEnvTypes = ['string', 'number', 'regex', 'array', 'json'];
@@ -236,6 +238,7 @@ const defaults: Record<string, any> = {
 	REFRESH_TOKEN_COOKIE_SECURE: false,
 	REFRESH_TOKEN_COOKIE_SAME_SITE: 'lax',
 	REFRESH_TOKEN_COOKIE_NAME: 'directus_refresh_token',
+	REFRESH_TOKEN_OVERLAP_DURATION: '10s',
 
 	LOGIN_STALL_TIME: 500,
 	SERVER_SHUTDOWN_TIMEOUT: 1000,
@@ -300,8 +303,9 @@ const defaults: Record<string, any> = {
 
 	GRAPHQL_INTROSPECTION: true,
 
-	FLOWS_EXEC_ALLOWED_MODULES: false,
 	FLOWS_ENV_ALLOW_LIST: false,
+	FLOWS_SCRIPT_MAX_MEMORY: 32,
+	FLOWS_SCRIPT_EXEC_TIMEOUT: 10000,
 };
 
 // Allows us to force certain environment variable into a type, instead of relying

@@ -1,6 +1,6 @@
-import { getUrl } from '@common/config';
+import { getUrl } from '@common/config.ts';
 import request from 'supertest';
-import vendors from '@common/get-dbs-to-test';
+import vendors from '@common/get-dbs-to-test.ts';
 
 describe('/auth/login/saml', () => {
 	const authCookies: Record<string, string> = {};
@@ -14,7 +14,10 @@ describe('/auth/login/saml', () => {
 						.get(`/simplesaml/module.php/core/authenticate.php?as=example-userpass`)
 						.expect(302);
 
-					const cookies = loginPage.headers['set-cookie'].map((cookie: string) => cookie.split(';')[0]).join(';');
+					const cookies = loginPage
+						.get('Set-Cookie')!
+						.map((cookie: string) => cookie.split(';')[0])
+						.join(';');
 
 					const AuthState = decodeURIComponent(String(loginPage.headers.location)).split('AuthState=')[1];
 
@@ -29,7 +32,10 @@ describe('/auth/login/saml', () => {
 						})
 						.expect(200);
 
-					authCookies[vendor] = response.headers['set-cookie'].map((cookie: string) => cookie.split(';')[0]).join(';');
+					authCookies[vendor] = response
+						.get('Set-Cookie')!
+						.map((cookie: string) => cookie.split(';')[0])
+						.join(';');
 
 					// Assert
 					expect(authCookies[vendor]).toMatch(/PHPSESSIDIDP/);
@@ -46,7 +52,10 @@ describe('/auth/login/saml', () => {
 						.get(`/simplesaml/module.php/core/authenticate.php?as=example-userpass`)
 						.expect(302);
 
-					const cookies = loginPage.headers['set-cookie'].map((cookie: string) => cookie.split(';')[0]).join(';');
+					const cookies = loginPage
+						.get('Set-Cookie')!
+						.map((cookie: string) => cookie.split(';')[0])
+						.join(';');
 
 					const AuthState = decodeURIComponent(String(loginPage.headers.location)).split('AuthState=')[1];
 
@@ -61,7 +70,10 @@ describe('/auth/login/saml', () => {
 						})
 						.expect(303);
 
-					authCookies[vendor] = response.headers['set-cookie'].map((cookie: string) => cookie.split(';')[0]).join(';');
+					authCookies[vendor] = response
+						.get('Set-Cookie')!
+						.map((cookie: string) => cookie.split(';')[0])
+						.join(';');
 
 					// Assert
 					expect(authCookies[vendor]).toMatch(/PHPSESSIDIDP/);
@@ -140,7 +152,10 @@ describe('/auth/login/saml', () => {
 						})
 						.expect(302);
 
-					const cookies = acsResponse.headers['set-cookie'].map((cookie: string) => cookie.split(';')[0]).join(';');
+					const cookies = acsResponse
+						.get('Set-Cookie')!
+						.map((cookie: string) => cookie.split(';')[0])
+						.join(';');
 
 					// Assert
 					expect(cookies).toMatch(/directus_refresh_token/);

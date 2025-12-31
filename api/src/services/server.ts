@@ -16,7 +16,7 @@ import { SERVER_ONLINE } from '../server.js';
 import { getStorage } from '../storage/index.js';
 import type { AbstractServiceOptions } from '../types/index.js';
 import { getOSInfo } from '../utils/get-os-info.js';
-import { version } from '../utils/package.js';
+import { version, mainVersion } from '../utils/package.js';
 import { SettingsService } from './settings.js';
 
 export class ServerService {
@@ -69,10 +69,6 @@ export class ServerService {
 			} else {
 				info['rateLimitGlobal'] = false;
 			}
-
-			info['flows'] = {
-				execAllowedModules: env['FLOWS_EXEC_ALLOWED_MODULES'] ? toArray(env['FLOWS_EXEC_ALLOWED_MODULES']) : [],
-			};
 		}
 
 		if (this.accountability?.admin === true) {
@@ -80,6 +76,7 @@ export class ServerService {
 
 			info['directus'] = {
 				version,
+				mainVersion,
 			};
 
 			info['node'] = {
@@ -201,7 +198,8 @@ export class ServerService {
 			checks[`${client}:responseTime`]![0]!.observedValue = +(endTime - startTime).toFixed(3);
 
 			if (
-				checks[`${client}:responseTime`]![0]!.observedValue! > checks[`${client}:responseTime`]![0]!.threshold! &&
+				Number(checks[`${client}:responseTime`]![0]!.observedValue!) >
+					checks[`${client}:responseTime`]![0]!.threshold! &&
 				checks[`${client}:responseTime`]![0]!.status !== 'error'
 			) {
 				checks[`${client}:responseTime`]![0]!.status = 'warn';
@@ -388,7 +386,7 @@ export class ServerService {
 					checks[`storage:${location}:responseTime`]![0]!.observedValue = +(endTime - startTime).toFixed(3);
 
 					if (
-						checks[`storage:${location}:responseTime`]![0]!.observedValue! >
+						Number(checks[`storage:${location}:responseTime`]![0]!.observedValue!) >
 							checks[`storage:${location}:responseTime`]![0]!.threshold! &&
 						checks[`storage:${location}:responseTime`]![0]!.status !== 'error'
 					) {

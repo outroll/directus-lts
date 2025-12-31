@@ -2,7 +2,7 @@ import api, { replaceQueue } from '@/api';
 import { AUTH_SSO_DRIVERS, DEFAULT_AUTH_DRIVER, DEFAULT_AUTH_PROVIDER } from '@/constants';
 import { i18n } from '@/lang';
 import { setLanguage } from '@/lang/set-language';
-import formatTitle from '@directus/format-title';
+import formatTitle from '@outroll/format-title';
 import { acceptHMRUpdate, defineStore } from 'pinia';
 import { computed, reactive, unref } from 'vue';
 import { useUserStore } from '@/stores/user';
@@ -28,6 +28,7 @@ export type Info = {
 	};
 	directus?: {
 		version: string;
+		mainVersion: string;
 	};
 	node?: {
 		version: string;
@@ -45,9 +46,6 @@ export type Info = {
 				points: number;
 				duration: number;
 		  };
-	flows?: {
-		execAllowedModules: string[];
-	};
 };
 
 export type Auth = {
@@ -62,7 +60,6 @@ export const useServerStore = defineStore('serverStore', () => {
 		node: undefined,
 		os: undefined,
 		rateLimit: undefined,
-		flows: undefined,
 	});
 
 	const auth = reactive<Auth>({
@@ -96,7 +93,6 @@ export const useServerStore = defineStore('serverStore', () => {
 		info.directus = serverInfoResponse.data.data?.directus;
 		info.node = serverInfoResponse.data.data?.node;
 		info.os = serverInfoResponse.data.data?.os;
-		info.flows = serverInfoResponse.data.data?.flows;
 
 		auth.providers = authResponse.data.data;
 		auth.disableDefault = authResponse.data.disableDefault;

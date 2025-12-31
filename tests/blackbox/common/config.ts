@@ -1,7 +1,9 @@
-import { Knex } from 'knex';
-import path from 'node:path';
-import { promisify } from 'util';
-import { allVendors } from './get-dbs-to-test';
+import type { Knex } from 'knex';
+import path, { dirname } from 'node:path';
+import { allVendors } from './get-dbs-to-test.ts';
+import { fileURLToPath } from 'node:url';
+
+const __dirname = dirname(fileURLToPath(import.meta.url));
 
 type Vendor = (typeof allVendors)[number];
 
@@ -58,7 +60,7 @@ const directusStorageConfig = {
 	STORAGE_MINIO_SECRET: 'miniosecret',
 	STORAGE_MINIO_BUCKET: 'directus-blackbox-test',
 	STORAGE_MINIO_REGION: 'us-east-1',
-	STORAGE_MINIO_ENDPOINT: 'http://localhost:8881',
+	STORAGE_MINIO_ENDPOINT: 'http://127.0.0.1:8881',
 	STORAGE_MINIO_FORCE_PATH_STYLE: 'true',
 };
 
@@ -137,7 +139,7 @@ const config: Config = {
 				database: 'directus',
 				user: 'root',
 				password: 'secret',
-				host: 'localhost',
+				host: '127.0.0.1',
 				port: 6104,
 			},
 			...knexConfig,
@@ -174,10 +176,9 @@ const config: Config = {
 				port: 6107,
 			},
 			pool: {
-				afterCreate: async (conn: any, callback: any) => {
-					const run = promisify(conn.query.bind(conn));
-					await run('SET serial_normalization = "sql_sequence"');
-					await run('SET default_int_size = 4');
+				afterCreate: (conn: any, callback: any) => {
+					conn.query('SET serial_normalization = "sql_sequence"');
+					conn.query('SET default_int_size = 4');
 					callback(null, conn);
 				},
 			},
@@ -190,9 +191,8 @@ const config: Config = {
 			},
 			useNullAsDefault: true,
 			pool: {
-				afterCreate: async (conn: any, callback: any) => {
-					const run = promisify(conn.run.bind(conn));
-					await run('PRAGMA foreign_keys = ON');
+				afterCreate: (conn: any, callback: any) => {
+					conn.run('PRAGMA foreign_keys = ON');
 					callback(null, conn);
 				},
 			},
@@ -254,7 +254,7 @@ const config: Config = {
 		maria: {
 			...directusConfig,
 			DB_CLIENT: 'mysql',
-			DB_HOST: `localhost`,
+			DB_HOST: `127.0.0.1`,
 			DB_PORT: '6104',
 			DB_USER: 'root',
 			DB_PASSWORD: 'secret',
@@ -302,6 +302,7 @@ const isWindows = ['win32', 'win64'].includes(process.platform);
 
 for (const vendor of allVendors) {
 	config.envs[vendor]!.TZ = isWindows ? '0' : 'UTC';
+	config.envs[vendor]['PUBLIC_URL'] = getUrl(vendor);
 }
 
 export function getUrl(vendor: (typeof allVendors)[number], overrideEnv?: Env) {

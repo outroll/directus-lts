@@ -7,7 +7,8 @@ import env from '../env.js';
 import { PayloadService } from '../services/payload.js';
 import type { AST, FieldNode, FunctionFieldNode, M2ONode, NestedCollectionNode } from '../types/ast.js';
 import { applyFunctionToColumnName } from '../utils/apply-function-to-column-name.js';
-import applyQuery, { applyLimit, applySort, ColumnSortRecord, generateAlias } from '../utils/apply-query.js';
+import type { ColumnSortRecord } from '../utils/apply-query.js';
+import applyQuery, { applyLimit, applySort, generateAlias } from '../utils/apply-query.js';
 import { getCollectionFromAlias } from '../utils/get-collection-from-alias.js';
 import type { AliasMap } from '../utils/get-column-path.js';
 import { getColumn } from '../utils/get-column.js';
@@ -82,7 +83,7 @@ export default async function runAST(
 
 		// Run the items through the special transforms
 		const payloadService = new PayloadService(collection, { knex, schema });
-		let items: null | Item | Item[] = await payloadService.processValues('read', rawItems);
+		let items: null | Item | Item[] = await payloadService.processValues('read', rawItems, query.alias ?? {});
 
 		if (!items || (Array.isArray(items) && items.length === 0)) return items;
 

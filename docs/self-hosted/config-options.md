@@ -206,6 +206,7 @@ prefixing the value with `{type}:`. The following types are available:
 | `MAX_BATCH_MUTATION`       | The maximum number of items for batch mutations when creating, updating and deleting.                      | `Infinity`                   |
 | `MAX_RELATIONAL_DEPTH`     | The maximum depth when filtering / querying relational fields, with a minimum value of `2`.                | `10`                         |
 | `ROBOTS_TXT`               | What the `/robots.txt` endpoint should return                                                              | `User-agent: *\nDisallow: /` |
+| `X_POWERED_BY_ENABLED`     | Whether the response should return the X-Powered-By Directus Header                                        | `true`                       |
 
 <sup>[1]</sup> The PUBLIC_URL value is used for things like OAuth redirects, forgot-password emails, and logos that
 needs to be publicly available on the internet.
@@ -281,11 +282,16 @@ All the `DB_POOL__` prefixed options are passed to [`tarn.js`](https://github.co
 | `KEY`                            | Unique identifier for the project.                                                                                                                                                                   | --                        |
 | `SECRET`                         | Secret string for the project.                                                                                                                                                                       | --                        |
 | `ACCESS_TOKEN_TTL`               | The duration that the access token is valid.                                                                                                                                                         | `15m`                     |
+| `ACCESS_TOKEN_COOKIE_DOMAIN`     | Which domain to use for the access cookie. Useful for development mode.                                                                                                                              | --                        |
+| `ACCESS_TOKEN_COOKIE_SECURE`     | Whether or not to use a secure cookie for the access token in cookie mode.                                                                                                                           | `false`                   |
+| `ACCESS_TOKEN_COOKIE_SAME_SITE`  | Value for `sameSite` in the access token cookie when in cookie mode.                                                                                                                                 | `lax`                     |
+| `ACCESS_TOKEN_COOKIE_NAME`       | Name of access token cookie .                                                                                                                                                                        | `directus_access_token`   |
 | `REFRESH_TOKEN_TTL`              | The duration that the refresh token is valid, and also how long users stay logged-in to the App.                                                                                                     | `7d`                      |
 | `REFRESH_TOKEN_COOKIE_DOMAIN`    | Which domain to use for the refresh cookie. Useful for development mode.                                                                                                                             | --                        |
 | `REFRESH_TOKEN_COOKIE_SECURE`    | Whether or not to use a secure cookie for the refresh token in cookie mode.                                                                                                                          | `false`                   |
 | `REFRESH_TOKEN_COOKIE_SAME_SITE` | Value for `sameSite` in the refresh token cookie when in cookie mode.                                                                                                                                | `lax`                     |
 | `REFRESH_TOKEN_COOKIE_NAME`      | Name of refresh token cookie .                                                                                                                                                                       | `directus_refresh_token`  |
+| `REFRESH_TOKEN_OVERLAP_DURATION` | Duration allowing concurrent refresh requests to receive the same new token, preventing authentication failures when multiple requests refresh simultaneously                                        | `10s`                     |
 | `LOGIN_STALL_TIME`               | The duration in milliseconds that a login request will be stalled for, and it should be greater than the time taken for a login request with an invalid password                                     | `500`                     |
 | `PASSWORD_RESET_URL_ALLOW_LIST`  | List of URLs that can be used [as `reset_url` in /password/request](/reference/authentication#request-password-reset)                                                                                | --                        |
 | `USER_INVITE_URL_ALLOW_LIST`     | List of URLs that can be used [as `invite_url` in /users/invite](/reference/system/users#invite-a-new-user)                                                                                          | --                        |
@@ -296,7 +302,6 @@ All the `DB_POOL__` prefixed options are passed to [`tarn.js`](https://github.co
 | `CONTENT_SECURITY_POLICY_*`      | Custom overrides for the Content-Security-Policy header. See [helmet's documentation on `helmet.contentSecurityPolicy()`](https://helmetjs.github.io) for more information.                          | --                        |
 | `HSTS_ENABLED`                   | Enable the Strict-Transport-Security policy header.                                                                                                                                                  | `false`                   |
 | `HSTS_*`                         | Custom overrides for the Strict-Transport-Security header. See [helmet's documentation](https://helmetjs.github.io) for more information.                                                            | --                        |
-| `FLOWS_EXEC_ALLOWED_MODULES`     | CSV allowlist of node modules that are allowed to be used in the _run script_ operation in flows                                                                                                     | --                        |
 
 ::: tip Cookie Strictness
 
@@ -729,23 +734,24 @@ These flows rely on the `PUBLIC_URL` variable for redirecting. Ensure the variab
 
 ### OAuth 2.0
 
-| Variable                                    | Description                                                                                   | Default Value    |
-| ------------------------------------------- | --------------------------------------------------------------------------------------------- | ---------------- |
-| `AUTH_<PROVIDER>_CLIENT_ID`                 | Client identifier for the OAuth provider.                                                     | --               |
-| `AUTH_<PROVIDER>_CLIENT_SECRET`             | Client secret for the OAuth provider.                                                         | --               |
-| `AUTH_<PROVIDER>_SCOPE`                     | A white-space separated list of permissions to request.                                       | `email`          |
-| `AUTH_<PROVIDER>_AUTHORIZE_URL`             | Authorization page URL of the OAuth provider.                                                 | --               |
-| `AUTH_<PROVIDER>_ACCESS_URL`                | Access token URL of the OAuth provider.                                                       | --               |
-| `AUTH_<PROVIDER>_PROFILE_URL`               | User profile URL of the OAuth provider.                                                       | --               |
-| `AUTH_<PROVIDER>_IDENTIFIER_KEY`            | User profile identifier key <sup>[1]</sup>. Will default to `EMAIL_KEY`.                      | --               |
-| `AUTH_<PROVIDER>_EMAIL_KEY`                 | User profile email key.                                                                       | `email`          |
-| `AUTH_<PROVIDER>_FIRST_NAME_KEY`            | User profile first name key.                                                                  | --               |
-| `AUTH_<PROVIDER>_LAST_NAME_KEY`             | User profile last name key.                                                                   | --               |
-| `AUTH_<PROVIDER>_ALLOW_PUBLIC_REGISTRATION` | Automatically create accounts for authenticating users.                                       | `false`          |
-| `AUTH_<PROVIDER>_DEFAULT_ROLE_ID`           | A Directus role ID to assign created users.                                                   | --               |
-| `AUTH_<PROVIDER>_ICON`                      | SVG icon to display with the login link. [See options here](/getting-started/glossary#icons). | `account_circle` |
-| `AUTH_<PROVIDER>_LABEL`                     | Text to be presented on SSO button within App.                                                | `<PROVIDER>`     |
-| `AUTH_<PROVIDER>_PARAMS`                    | Custom query parameters applied to the authorization URL.                                     | --               |
+| Variable                                    | Description                                                                                              | Default Value    |
+| ------------------------------------------- | -------------------------------------------------------------------------------------------------------- | ---------------- |
+| `AUTH_<PROVIDER>_CLIENT_ID`                 | Client identifier for the OAuth provider.                                                                | --               |
+| `AUTH_<PROVIDER>_CLIENT_SECRET`             | Client secret for the OAuth provider.                                                                    | --               |
+| `AUTH_<PROVIDER>_SCOPE`                     | A white-space separated list of permissions to request.                                                  | `email`          |
+| `AUTH_<PROVIDER>_AUTHORIZE_URL`             | Authorization page URL of the OAuth provider.                                                            | --               |
+| `AUTH_<PROVIDER>_ACCESS_URL`                | Access token URL of the OAuth provider.                                                                  | --               |
+| `AUTH_<PROVIDER>_PROFILE_URL`               | User profile URL of the OAuth provider.                                                                  | --               |
+| `AUTH_<PROVIDER>_IDENTIFIER_KEY`            | User profile identifier key <sup>[1]</sup>. Will default to `EMAIL_KEY`.                                 | --               |
+| `AUTH_<PROVIDER>_EMAIL_KEY`                 | User profile email key.                                                                                  | `email`          |
+| `AUTH_<PROVIDER>_FIRST_NAME_KEY`            | User profile first name key.                                                                             | --               |
+| `AUTH_<PROVIDER>_LAST_NAME_KEY`             | User profile last name key.                                                                              | --               |
+| `AUTH_<PROVIDER>_ALLOW_PUBLIC_REGISTRATION` | Automatically create accounts for authenticating users.                                                  | `false`          |
+| `AUTH_<PROVIDER>_DEFAULT_ROLE_ID`           | A Directus role ID to assign created users.                                                              | --               |
+| `AUTH_<PROVIDER>_ICON`                      | SVG icon to display with the login link. [See options here](/getting-started/glossary#icons).            | `account_circle` |
+| `AUTH_<PROVIDER>_LABEL`                     | Text to be presented on SSO button within App.                                                           | `<PROVIDER>`     |
+| `AUTH_<PROVIDER>_PARAMS`                    | Custom query parameters applied to the authorization URL.                                                | --               |
+| `AUTH_<PROVIDER>_REDIRECT_ALLOW_LIST`       | List of external URLs (including paths) allowed for redirecting after successful login, comma-separated. | --               |
 
 <sup>[1]</sup> When authenticating, Directus will match the identifier value from the external user profile to a
 Directus users "External Identifier".
@@ -754,19 +760,20 @@ Directus users "External Identifier".
 
 OpenID is an authentication protocol built on OAuth 2.0, and should be preferred over standard OAuth 2.0 where possible.
 
-| Variable                                    | Description                                                                                   | Default Value          |
-| ------------------------------------------- | --------------------------------------------------------------------------------------------- | ---------------------- |
-| `AUTH_<PROVIDER>_CLIENT_ID`                 | Client identifier for the external service.                                                   | --                     |
-| `AUTH_<PROVIDER>_CLIENT_SECRET`             | Client secret for the external service.                                                       | --                     |
-| `AUTH_<PROVIDER>_SCOPE`                     | A white-space separated list of permissions to request.                                       | `openid profile email` |
-| `AUTH_<PROVIDER>_ISSUER_URL`                | OpenID `.well-known` discovery document URL of the external service.                          | --                     |
-| `AUTH_<PROVIDER>_IDENTIFIER_KEY`            | User profile identifier key <sup>[1]</sup>.                                                   | `sub`<sup>[2]</sup>    |
-| `AUTH_<PROVIDER>_ALLOW_PUBLIC_REGISTRATION` | Automatically create accounts for authenticating users.                                       | `false`                |
-| `AUTH_<PROVIDER>_REQUIRE_VERIFIED_EMAIL`    | Require created users to have a verified email address.                                       | `false`                |
-| `AUTH_<PROVIDER>_DEFAULT_ROLE_ID`           | A Directus role ID to assign created users.                                                   | --                     |
-| `AUTH_<PROVIDER>_ICON`                      | SVG icon to display with the login link. [See options here](/getting-started/glossary#icons). | `account_circle`       |
-| `AUTH_<PROVIDER>_LABEL`                     | Text to be presented on SSO button within App.                                                | `<PROVIDER>`           |
-| `AUTH_<PROVIDER>_PARAMS`                    | Custom query parameters applied to the authorization URL.                                     | --                     |
+| Variable                                    | Description                                                                                              | Default Value          |
+| ------------------------------------------- | -------------------------------------------------------------------------------------------------------- | ---------------------- |
+| `AUTH_<PROVIDER>_CLIENT_ID`                 | Client identifier for the external service.                                                              | --                     |
+| `AUTH_<PROVIDER>_CLIENT_SECRET`             | Client secret for the external service.                                                                  | --                     |
+| `AUTH_<PROVIDER>_SCOPE`                     | A white-space separated list of permissions to request.                                                  | `openid profile email` |
+| `AUTH_<PROVIDER>_ISSUER_URL`                | OpenID `.well-known` discovery document URL of the external service.                                     | --                     |
+| `AUTH_<PROVIDER>_IDENTIFIER_KEY`            | User profile identifier key <sup>[1]</sup>.                                                              | `sub`<sup>[2]</sup>    |
+| `AUTH_<PROVIDER>_ALLOW_PUBLIC_REGISTRATION` | Automatically create accounts for authenticating users.                                                  | `false`                |
+| `AUTH_<PROVIDER>_REQUIRE_VERIFIED_EMAIL`    | Require created users to have a verified email address.                                                  | `false`                |
+| `AUTH_<PROVIDER>_DEFAULT_ROLE_ID`           | A Directus role ID to assign created users.                                                              | --                     |
+| `AUTH_<PROVIDER>_ICON`                      | SVG icon to display with the login link. [See options here](/getting-started/glossary#icons).            | `account_circle`       |
+| `AUTH_<PROVIDER>_LABEL`                     | Text to be presented on SSO button within App.                                                           | `<PROVIDER>`           |
+| `AUTH_<PROVIDER>_PARAMS`                    | Custom query parameters applied to the authorization URL.                                                | --                     |
+| `AUTH_<PROVIDER>_REDIRECT_ALLOW_LIST`       | List of external URLs (including paths) allowed for redirecting after successful login, comma-separated. | --                     |
 
 <sup>[1]</sup> When authenticating, Directus will match the identifier value from the external user profile to a
 Directus users "External Identifier".
@@ -830,14 +837,15 @@ without a password.
 - Identity provider (IdP) authenticates users and provides to service providers an authentication assertion that
   indicates a user has been authenticated.
 
-| Variable                                    | Description                                                              | Default Value |
-| ------------------------------------------- | ------------------------------------------------------------------------ | ------------- |
-| `AUTH_<PROVIDER>_SP_metadata`               | String containing XML metadata for service provider                      | --            |
-| `AUTH_<PROVIDER>_IDP_metadata`              | String containing XML metadata for identity provider                     | --            |
-| `AUTH_<PROVIDER>_ALLOW_PUBLIC_REGISTRATION` | Automatically create accounts for authenticating users.                  | `false`       |
-| `AUTH_<PROVIDER>_DEFAULT_ROLE_ID`           | A Directus role ID to assign created users.                              | --            |
-| `AUTH_<PROVIDER>_IDENTIFIER_KEY`            | User profile identifier key <sup>[1]</sup>. Will default to `EMAIL_KEY`. | --            |
-| `AUTH_<PROVIDER>_EMAIL_KEY`                 | User profile email key.                                                  | `email`       |
+| Variable                                    | Description                                                                                              | Default Value |
+| ------------------------------------------- | -------------------------------------------------------------------------------------------------------- | ------------- |
+| `AUTH_<PROVIDER>_SP_metadata`               | String containing XML metadata for service provider                                                      | --            |
+| `AUTH_<PROVIDER>_IDP_metadata`              | String containing XML metadata for identity provider                                                     | --            |
+| `AUTH_<PROVIDER>_ALLOW_PUBLIC_REGISTRATION` | Automatically create accounts for authenticating users.                                                  | `false`       |
+| `AUTH_<PROVIDER>_DEFAULT_ROLE_ID`           | A Directus role ID to assign created users.                                                              | --            |
+| `AUTH_<PROVIDER>_IDENTIFIER_KEY`            | User profile identifier key <sup>[1]</sup>. Will default to `EMAIL_KEY`.                                 | --            |
+| `AUTH_<PROVIDER>_EMAIL_KEY`                 | User profile email key.                                                                                  | `email`       |
+| `AUTH_<PROVIDER>_REDIRECT_ALLOW_LIST`       | List of external URLs (including paths) allowed for redirecting after successful login, comma-separated. | --            |
 
 <sup>[1]</sup> When authenticating, Directus will match the identifier value from the external user profile to a
 Directus users "External Identifier".
@@ -873,18 +881,13 @@ AUTH_FACEBOOK_LABEL="Facebook"
 
 ## Flows
 
-| Variable                     | Description                                      | Default Value |
-| ---------------------------- | ------------------------------------------------ | ------------- |
-| `FLOWS_ENV_ALLOW_LIST`       | A comma-separated list of environment variables. | `false`       |
-| `FLOWS_EXEC_ALLOWED_MODULES` | A comma-separated list of node modules.          | `false`       |
+| Variable                    | Description                                                                                             | Default Value |
+| --------------------------- | ------------------------------------------------------------------------------------------------------- | ------------- |
+| `FLOWS_ENV_ALLOW_LIST`      | A comma-separated list of environment variables.                                                        | `false`       |
+| `FLOWS_SCRIPT_MAX_MEMORY`   | The maximum memory (in MB) that the 'Run Script' operation can allocate. Must be at least 8MB.          | `32`          |
+| `FLOWS_SCRIPT_EXEC_TIMEOUT` | The maximum execution time (in milliseconds) allowed for the 'Run Script' operation before termination. | `10000`       |
 
 ::: tip Usage in Flows Run Script Operation
-
-Allowed modules can be accessed using `require()`.
-
-```js
-const axios = require('axios');
-```
 
 Allowed environment variables can be accessed through the `$env` within the passed `data` or through `process.env`.
 
@@ -979,11 +982,11 @@ Based on the `EMAIL_TRANSPORT` used, you must also provide the following configu
 
 ### AWS SES (`ses`)
 
-| Variable                                   | Description                  | Default Value |
-| ------------------------------------------ | ---------------------------- | ------------- |
+| Variable                                   | Description                 | Default Value |
+| ------------------------------------------ | --------------------------- | ------------- |
 | `EMAIL_SES_CREDENTIALS__ACCESS_KEY_ID`     | Your AWS SES access key ID. | --            |
-| `EMAIL_SES_CREDENTIALS__SECRET_ACCESS_KEY` | Your AWS SES secret key.     | --            |
-| `EMAIL_SES_REGION`                         | Your AWS SES region.         | --            |
+| `EMAIL_SES_CREDENTIALS__SECRET_ACCESS_KEY` | Your AWS SES secret key.    | --            |
+| `EMAIL_SES_REGION`                         | Your AWS SES region.        | --            |
 
 ## Admin Account
 

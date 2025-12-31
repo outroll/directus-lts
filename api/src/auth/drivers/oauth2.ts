@@ -1,39 +1,56 @@
 import { BaseException } from '@outroll/exceptions';
 import type { Accountability } from '@outroll/types';
-import { parseJSON } from '@outroll/utils';
 import express, { Router } from 'express';
 import flatten from 'flat';
 import jwt from 'jsonwebtoken';
-import { Client, errors, generators, Issuer } from 'openid-client';
+import type { BaseClient, Client, TokenSet } from 'openid-client';
+import { Issuer, generators } from 'openid-client';
 import { getAuthProvider } from '../../auth.js';
-import getDatabase from '../../database/index.js';
-import emitter from '../../emitter.js';
+import { ACCESS_COOKIE_OPTIONS, REFRESH_COOKIE_OPTIONS } from '../../constants.js';
 import env from '../../env.js';
-import { RecordNotUniqueException } from '../../exceptions/database/record-not-unique.js';
 import {
 	InvalidConfigException,
 	InvalidCredentialsException,
-	InvalidProviderException,
 	InvalidTokenException,
-	ServiceUnavailableException,
+	InvalidPayloadException,
 } from '../../exceptions/index.js';
 import logger from '../../logger.js';
 import { respond } from '../../middleware/respond.js';
 import { AuthenticationService } from '../../services/authentication.js';
 import { UsersService } from '../../services/users.js';
-import type { AuthData, AuthDriverOptions, User } from '../../types/index.js';
+import type { AuthDriverOptions } from '../../types/index.js';
 import asyncHandler from '../../utils/async-handler.js';
 import { getConfigFromEnv } from '../../utils/get-config-from-env.js';
 import { getIPFromReq } from '../../utils/get-ip-from-req.js';
-import { getMilliseconds } from '../../utils/get-milliseconds.js';
 import { Url } from '../../utils/url.js';
-import { LocalAuthDriver } from './local.js';
+import { BaseOAuthDriver, type UserPayload } from './baseoauth.js';
+import { isRedirectAllowedOnLogin } from '../../utils/is-redirect-allowed-on-login.js';
 
-export class OAuth2AuthDriver extends LocalAuthDriver {
+export class OAuth2AuthDriver extends BaseOAuthDriver {
 	client: Client;
 	redirectUrl: string;
 	usersService: UsersService;
 	config: Record<string, any>;
+
+	getClient(): Promise<BaseClient> {
+		return Promise.resolve(this.client);
+	}
+
+	getredirectUrl(): string {
+		return this.redirectUrl;
+	}
+
+	getUserService(): UsersService {
+		return this.usersService;
+	}
+
+	getConfig(): Record<string, any> {
+		return this.config;
+	}
+
+	getClientName(): string {
+		return 'OAuth2';
+	}
 
 	constructor(options: AuthDriverOptions, config: Record<string, any>) {
 		super(options, config);
@@ -72,10 +89,6 @@ export class OAuth2AuthDriver extends LocalAuthDriver {
 		});
 	}
 
-	generateCodeVerifier(): string {
-		return generators.codeVerifier();
-	}
-
 	generateAuthUrl(codeVerifier: string, prompt = false): string {
 		try {
 			const codeChallenge = generators.codeChallenge(codeVerifier);
@@ -92,26 +105,13 @@ export class OAuth2AuthDriver extends LocalAuthDriver {
 				state: codeChallenge,
 			});
 		} catch (e) {
-			throw handleError(e);
+			throw this.handleError(e);
 		}
 	}
 
-	private async fetchUserId(identifier: string): Promise<string | undefined> {
-		const user = await this.knex
-			.select('id')
-			.from('directus_users')
-			.whereRaw('LOWER(??) = ?', ['external_identifier', identifier.toLowerCase()])
-			.first();
-
-		return user?.id;
-	}
-
-	override async getUserID(payload: Record<string, any>): Promise<string> {
-		if (!payload['code'] || !payload['codeVerifier'] || !payload['state']) {
-			logger.warn('[OAuth2] No code, codeVerifier or state in payload');
-			throw new InvalidCredentialsException();
-		}
-
+	async getTokenSetAndUserInfo(
+		payload: Record<string, any>
+	): Promise<[TokenSet, Record<string, unknown>, UserPayload]> {
 		let tokenSet;
 		let userInfo;
 
@@ -124,13 +124,13 @@ export class OAuth2AuthDriver extends LocalAuthDriver {
 
 			userInfo = await this.client.userinfo(tokenSet.access_token!);
 		} catch (e) {
-			throw handleError(e);
+			throw this.handleError(e);
 		}
 
 		// Flatten response to support dot indexes
 		userInfo = flatten(userInfo) as Record<string, unknown>;
 
-		const { provider, emailKey, identifierKey, allowPublicRegistration } = this.config;
+		const { provider, emailKey, identifierKey } = this.config;
 
 		const email = userInfo[emailKey ?? 'email'] ? String(userInfo[emailKey ?? 'email']) : undefined;
 		// Fallback to email if explicit identifier not found
@@ -141,7 +141,7 @@ export class OAuth2AuthDriver extends LocalAuthDriver {
 			throw new InvalidCredentialsException();
 		}
 
-		const userPayload = {
+		const userPayload: UserPayload = {
 			provider,
 			first_name: userInfo[this.config['firstNameKey']],
 			last_name: userInfo[this.config['lastNameKey']],
@@ -151,116 +151,9 @@ export class OAuth2AuthDriver extends LocalAuthDriver {
 			auth_data: tokenSet.refresh_token && JSON.stringify({ refreshToken: tokenSet.refresh_token }),
 		};
 
-		const userId = await this.fetchUserId(identifier);
-
-		if (userId) {
-			// Run hook so the end user has the chance to augment the
-			// user that is about to be updated
-			const updatedUserPayload = await emitter.emitFilter(
-				`auth.update`,
-				{},
-				{
-					identifier,
-					provider: this.config['provider'],
-					providerPayload: { accessToken: tokenSet.access_token, userInfo },
-				},
-				{ database: getDatabase(), schema: this.schema, accountability: null }
-			);
-
-			// Update user to update refresh_token and other properties that might have changed
-			await this.usersService.updateOne(userId, updatedUserPayload);
-
-			return userId;
-		}
-
-		// Is public registration allowed?
-		if (!allowPublicRegistration) {
-			logger.warn(`[OAuth2] User doesn't exist, and public registration not allowed for provider "${provider}"`);
-			throw new InvalidCredentialsException();
-		}
-
-		// Run hook so the end user has the chance to augment the
-		// user that is about to be created
-		const updatedUserPayload = await emitter.emitFilter(
-			`auth.create`,
-			userPayload,
-			{
-				identifier,
-				provider: this.config['provider'],
-				providerPayload: { accessToken: tokenSet.access_token, userInfo },
-			},
-			{ database: getDatabase(), schema: this.schema, accountability: null }
-		);
-
-		try {
-			await this.usersService.createOne(updatedUserPayload);
-		} catch (e) {
-			if (e instanceof RecordNotUniqueException) {
-				logger.warn(e, '[OAuth2] Failed to register user. User not unique');
-				throw new InvalidProviderException();
-			}
-
-			throw e;
-		}
-
-		return (await this.fetchUserId(identifier)) as string;
-	}
-
-	override async login(user: User): Promise<void> {
-		return this.refresh(user);
-	}
-
-	override async refresh(user: User): Promise<void> {
-		let authData = user.auth_data as AuthData;
-
-		if (typeof authData === 'string') {
-			try {
-				authData = parseJSON(authData);
-			} catch {
-				logger.warn(`[OAuth2] Session data isn't valid JSON: ${authData}`);
-			}
-		}
-
-		if (authData?.['refreshToken']) {
-			try {
-				const tokenSet = await this.client.refresh(authData['refreshToken']);
-
-				// Update user refreshToken if provided
-				if (tokenSet.refresh_token) {
-					await this.usersService.updateOne(user.id, {
-						auth_data: JSON.stringify({ refreshToken: tokenSet.refresh_token }),
-					});
-				}
-			} catch (e) {
-				throw handleError(e);
-			}
-		}
+		return [tokenSet, userInfo, userPayload];
 	}
 }
-
-const handleError = (e: any) => {
-	if (e instanceof errors.OPError) {
-		if (e.error === 'invalid_grant') {
-			// Invalid token
-			logger.trace(e, `[OAuth2] Invalid grant`);
-			return new InvalidTokenException();
-		}
-
-		// Server response error
-		logger.trace(e, `[OAuth2] Unknown OP error`);
-		return new ServiceUnavailableException('Service returned unexpected response', {
-			service: 'oauth2',
-			message: e.error_description,
-		});
-	} else if (e instanceof errors.RPError) {
-		// Internal client error
-		logger.trace(e, `[OAuth2] Unknown RP error`);
-		return new InvalidCredentialsException();
-	}
-
-	logger.trace(e, `[OAuth2] Unknown error`);
-	return e;
-};
 
 export function createOAuth2AuthRouter(providerName: string): Router {
 	const router = Router();
@@ -271,15 +164,16 @@ export function createOAuth2AuthRouter(providerName: string): Router {
 			const provider = getAuthProvider(providerName) as OAuth2AuthDriver;
 			const codeVerifier = provider.generateCodeVerifier();
 			const prompt = !!req.query['prompt'];
+			const redirect = req.query['redirect'];
 
-			const token = jwt.sign(
-				{ verifier: codeVerifier, redirect: req.query['redirect'], prompt },
-				env['SECRET'] as string,
-				{
-					expiresIn: '5m',
-					issuer: 'directus',
-				}
-			);
+			if (isRedirectAllowedOnLogin(redirect, providerName) === false) {
+				throw new InvalidPayloadException(`URL "${redirect}" can't be used to redirect after login`);
+			}
+
+			const token = jwt.sign({ verifier: codeVerifier, redirect, prompt }, env['SECRET'] as string, {
+				expiresIn: '5m',
+				issuer: 'directus',
+			});
 
 			res.cookie(`oauth2.${providerName}`, token, {
 				httpOnly: true,
@@ -371,14 +265,8 @@ export function createOAuth2AuthRouter(providerName: string): Router {
 			const { accessToken, refreshToken, expires } = authResponse;
 
 			if (redirect) {
-				res.cookie(env['REFRESH_TOKEN_COOKIE_NAME'], refreshToken, {
-					httpOnly: true,
-					domain: env['REFRESH_TOKEN_COOKIE_DOMAIN'],
-					maxAge: getMilliseconds(env['REFRESH_TOKEN_TTL']),
-					secure: env['REFRESH_TOKEN_COOKIE_SECURE'] ?? false,
-					sameSite: (env['REFRESH_TOKEN_COOKIE_SAME_SITE'] as 'lax' | 'strict' | 'none') || 'strict',
-				});
-
+				res?.cookie(env['ACCESS_TOKEN_COOKIE_NAME'], accessToken, ACCESS_COOKIE_OPTIONS);
+				res?.cookie(env['REFRESH_TOKEN_COOKIE_NAME'], refreshToken, REFRESH_COOKIE_OPTIONS);
 				return res.redirect(redirect);
 			}
 

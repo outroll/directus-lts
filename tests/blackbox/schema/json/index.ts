@@ -1,8 +1,8 @@
-/** @TODO replace with import from @directus/utils */
-import { getFilterOperatorsForType } from '../../utils/get-filter-operators-for-type';
+/** @TODO replace with import from @outroll/utils */
+import { getFilterOperatorsForType } from '../../utils/get-filter-operators-for-type.ts';
 import type { ClientFilterOperator } from '@outroll/types';
-import { FilterValidator, FilterEmptyValidator } from '@query/filter';
-import { GeneratedFilter } from '..';
+import type { FilterValidator, FilterEmptyValidator } from '@query/filter/index.ts';
+import type { GeneratedFilter } from '../index.ts';
 
 export const type = 'json';
 export const filterOperatorList = getFilterOperatorsForType(type);

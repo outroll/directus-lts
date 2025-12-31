@@ -1,4 +1,5 @@
-import nodemailer, { Transporter } from 'nodemailer';
+import type { Transporter } from 'nodemailer';
+import nodemailer from 'nodemailer';
 import env from './env.js';
 import logger from './logger.js';
 import { getConfigFromEnv } from './utils/get-config-from-env.js';
@@ -21,15 +22,15 @@ export default function getMailer(): Transporter {
 			path: env['EMAIL_SENDMAIL_PATH'] || '/usr/sbin/sendmail',
 		});
 	} else if (transportName === 'ses') {
-		const aws = require('@aws-sdk/client-ses');
+		const aws = require('@aws-sdk/client-sesv2');
 
 		const sesOptions: Record<string, unknown> = getConfigFromEnv('EMAIL_SES_');
 
-		const ses = new aws.SES(sesOptions);
+		const ses = new aws.SESv2Client(sesOptions);
 
 		transporter = nodemailer.createTransport({
-			SES: { ses, aws },
-		} as Record<string, unknown>);
+			SES: { sesClient: ses, SendEmailCommand: aws.SendEmailCommand },
+		});
 	} else if (transportName === 'smtp') {
 		let auth: boolean | { user?: string; pass?: string } = false;
 
@@ -65,13 +66,20 @@ export default function getMailer(): Transporter {
 			}) as any
 		);
 	} else if (transportName === 'sendgrid') {
-		const sg = require('nodemailer-sendgrid');
+		let auth: boolean | { user?: string; pass?: string } = false;
 
-		transporter = nodemailer.createTransport(
-			sg({
-				apiKey: env['EMAIL_SENDGRID_API_KEY'],
-			}) as any
-		);
+		if (env['EMAIL_SENDGRID_API_KEY'] || env['EMAIL_SMTP_PASSWORD']) {
+			auth = {
+				user: 'apikey',
+				pass: env['EMAIL_SENDGRID_API_KEY'],
+			};
+		}
+
+		transporter = nodemailer.createTransport({
+			host: 'smtp.sendgrid.net',
+			port: 587,
+			auth,
+		} as Record<string, unknown>);
 	} else {
 		logger.warn('Illegal transport given for email. Check the EMAIL_TRANSPORT env var.');
 	}

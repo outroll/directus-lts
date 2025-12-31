@@ -1,7 +1,7 @@
 import { defineDisplay } from '@outroll/utils';
 import { DisplayConfig } from '@outroll/types';
 import DisplayFormattedValue from './formatted-value.vue';
-import formatTitle from '@directus/format-title';
+import formatTitle from '@outroll/format-title';
 import { decode } from 'html-entities';
 import dompurify from 'dompurify';
 

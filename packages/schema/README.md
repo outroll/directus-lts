@@ -1,4 +1,4 @@
-# @directus/schema
+# @outroll/schema
 
 Utility for extracting information about the database schema
 

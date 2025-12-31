@@ -1,7 +1,8 @@
 import type { DeepPartial } from '@outroll/types';
 import { expect, test } from 'vitest';
 import { InvalidQueryException } from '../../src/exceptions/index.js';
-import { ColPathProps, getColumnPath } from '../../src/utils/get-column-path.js';
+import type { ColPathProps } from '../../src/utils/get-column-path.js';
+import { getColumnPath } from '../../src/utils/get-column-path.js';
 
 /*
 {

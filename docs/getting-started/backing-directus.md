@@ -23,8 +23,8 @@ or contact us for bulk merch pricing. We'll get it shipped as soon as sizing and
 
 **GitHub Stars**\
 As an open-source project, stars are a primary metric by which we measure our success. It only takes a few seconds to head
-to the [Directus GitHub Repo](https://github.com/directus/directus) and click the star. With enough activity in a short period
-of time, we get _even more exposure_ on GitHub's trending page!
+to the [Directus GitHub Repo](https://github.com/outroll/directus-lts) and click the star. With enough activity in a short
+period of time, we get _even more exposure_ on GitHub's trending page!
 
 **Social Posts**\
 Engage with us on social media. Follow us! A quick post mentioning [@directus](https://twitter.com/directus) goes a long
@@ -65,7 +65,7 @@ in our [Contributors Guide](/contributing/introduction).
 
 **Bug Reporting**\
 If you find an issue in Directus, no matter how small, we'd love to hear about it. Proper bug reporting helps our team improve
-platform stability. [Report a bug on GitHub](https://github.com/directus/directus/issues/new)
+platform stability. [Report a bug on GitHub](https://github.com/outroll/directus-lts/issues/new)
 
 **App Translations**\
 Every button, element, or other line of text in the app is [fully translatable](/contributing/translations). These translations

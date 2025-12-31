@@ -59,13 +59,50 @@ export const GENERATE_SPECIAL = ['uuid', 'date-created', 'role-created', 'user-c
 
 export const UUID_REGEX = '[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}';
 
-export const COOKIE_OPTIONS: CookieOptions = {
+export const REFRESH_COOKIE_OPTIONS: CookieOptions = {
 	httpOnly: true,
 	domain: env['REFRESH_TOKEN_COOKIE_DOMAIN'],
 	maxAge: getMilliseconds(env['REFRESH_TOKEN_TTL']),
 	secure: env['REFRESH_TOKEN_COOKIE_SECURE'] ?? false,
 	sameSite: (env['REFRESH_TOKEN_COOKIE_SAME_SITE'] as 'lax' | 'strict' | 'none') || 'strict',
+	path: '/auth',
 };
+
+export const REFRESH_COOKIE_CLEAR_OPTIONS: CookieOptions = (() => {
+	const { ...rest } = REFRESH_COOKIE_OPTIONS;
+	delete rest.maxAge;
+	delete rest.expires;
+	return rest;
+})();
+
+export const GET_SET_HEADER = (cookieValue: string) => {
+	const domainHeader = env['REFRESH_TOKEN_COOKIE_DOMAIN'] ? ` Domain=${env['REFRESH_TOKEN_COOKIE_DOMAIN']};` : '';
+	const partitionedHeader = env['REFRESH_TOKEN_COOKIE_PARTITIONED'] == true ? ' Partitioned;' : '';
+
+	const cookieHeaderValue = `${env['REFRESH_TOKEN_COOKIE_NAME']}=${cookieValue}; HttpOnly; Max-Age=${getMilliseconds(
+		env['REFRESH_TOKEN_TTL']
+	)}; Secure=${env['REFRESH_TOKEN_COOKIE_SECURE'] ?? false}; SameSite=${
+		(env['REFRESH_TOKEN_COOKIE_SAME_SITE'] as 'lax' | 'strict' | 'none') || 'strict'
+	}; Path=/auth;${domainHeader}${partitionedHeader}`;
+
+	return cookieHeaderValue;
+};
+
+export const ACCESS_COOKIE_OPTIONS: CookieOptions = {
+	httpOnly: true,
+	domain: env['ACCESS_TOKEN_COOKIE_DOMAIN'],
+	maxAge: getMilliseconds(env['ACCESS_TOKEN_TTL']),
+	secure: env['ACCESS_TOKEN_COOKIE_SECURE'] ?? false,
+	sameSite: (env['ACCESS_TOKEN_COOKIE_SAME_SITE'] as 'lax' | 'strict' | 'none') || 'strict',
+	path: '/assets',
+};
+
+export const ACCESS_COOKIE_CLEAR_OPTIONS: CookieOptions = (() => {
+	const { ...rest } = ACCESS_COOKIE_OPTIONS;
+	delete rest.maxAge;
+	delete rest.expires;
+	return rest;
+})();
 
 export const OAS_REQUIRED_SCHEMAS = ['Diff', 'Schema', 'Query', 'x-metadata'];
 

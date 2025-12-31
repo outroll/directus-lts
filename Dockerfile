@@ -3,7 +3,7 @@
 ####################################################################################################
 ## Build Packages
 
-FROM node:18-alpine AS builder
+FROM node:22-alpine AS builder
 WORKDIR /directus
 
 ENV NODE_OPTIONS=--max-old-space-size=8192
@@ -18,7 +18,7 @@ RUN pnpm install --recursive --offline --frozen-lockfile
 
 RUN : \
 	&& npm_config_workspace_concurrency=1 pnpm run build \
-	&& pnpm --filter directus deploy --prod dist \
+	&& pnpm --filter directus9 deploy --prod dist \
 	&& cd dist \
 	&& pnpm pack \
 	&& tar -zxvf *.tgz package/package.json \
@@ -30,7 +30,9 @@ RUN : \
 ####################################################################################################
 ## Create Production Image
 
-FROM node:18-alpine AS runtime
+FROM node:22-alpine AS runtime
+
+USER node
 
 WORKDIR /directus
 
@@ -46,8 +48,7 @@ ENV \
 
 COPY --from=builder --chown=node:node /directus/dist .
 
-USER node
-
+SHELL ["/bin/sh", "-c"]
 CMD : \
 	&& node /directus/cli.js bootstrap \
 	&& node /directus/cli.js start \

@@ -15,7 +15,7 @@ readTime: 14 min read
 ## Installation
 
 ```bash
-npm install @directus/sdk
+npm install @outroll/sdk
 ```
 
 ## Basic Usage
@@ -920,7 +920,7 @@ To upload a file you will need to send a `multipart/form-data` as body. On brows
 
 ```js
 /* index.js */
-import { Directus } from 'https://unpkg.com/@directus/sdk@latest/dist/sdk.esm.min.js';
+import { Directus } from 'https://unpkg.com/@outroll/sdk@latest/dist/sdk.esm.min.js';
 
 const directus = new Directus('https://example.directus.app', {
 	auth: {
@@ -963,7 +963,7 @@ When uploading a file from a NodeJS environment, you'll have to override the hea
 set:
 
 ```js
-import { Directus } from 'https://unpkg.com/@directus/sdk@latest/dist/sdk.esm.min.js';
+import { Directus } from 'https://unpkg.com/@outroll/sdk@latest/dist/sdk.esm.min.js';
 
 const directus = new Directus('https://example.directus.app', {
 	auth: {

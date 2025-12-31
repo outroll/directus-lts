@@ -1,23 +1,23 @@
 export {
-	defineInterface,
+	useApi,
+	useCollection,
+	useExtensions,
+	useFilterFields,
+	useItems,
+	useLayout,
+	useStores,
+	useSync,
+} from '@outroll/composables';
+export {
 	defineDisplay,
+	defineEndpoint,
+	defineHook,
+	defineInterface,
 	defineLayout,
 	defineModule,
-	definePanel,
-	defineHook,
-	defineEndpoint,
-	defineOperationApp,
 	defineOperationApi,
+	defineOperationApp,
+	definePanel,
 	getFieldsFromTemplate,
 	getRelationType,
 } from '@outroll/utils';
-export {
-	useStores,
-	useApi,
-	useExtensions,
-	useSync,
-	useCollection,
-	useItems,
-	useLayout,
-	useFilterFields,
-} from '@outroll/composables';

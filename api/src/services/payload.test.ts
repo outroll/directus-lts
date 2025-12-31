@@ -1,9 +1,11 @@
-import knex from 'knex';
 import type { Knex } from 'knex';
+import knex from 'knex';
 import { MockClient, Tracker, createTracker } from 'knex-mock-client';
+import type { MockedFunction } from 'vitest';
+import { afterEach, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
+import type { Helpers } from '../../src/database/helpers/index.js';
+import { getHelpers } from '../../src/database/helpers/index.js';
 import { PayloadService } from '../../src/services/index.js';
-import { getHelpers, Helpers } from '../../src/database/helpers/index.js';
-import { describe, beforeAll, afterEach, it, expect, vi, beforeEach, MockedFunction } from 'vitest';
 
 vi.mock('../../src/database/index', () => ({
 	getDatabaseClient: vi.fn().mockReturnValue('postgres'),
@@ -250,6 +252,85 @@ describe('Integration Tests', () => {
 						},
 					]);
 				});
+			});
+		});
+
+		describe('processValues', () => {
+			let service: PayloadService;
+
+			const hashedField = 'password';
+			const stringField = 'string';
+			const HASHED_SECURITY = '**********';
+
+			beforeEach(() => {
+				service = new PayloadService('test', {
+					knex: db,
+					schema: {
+						collections: {
+							test: {
+								collection: 'test',
+								primary: 'id',
+								singleton: false,
+								sortField: null,
+								note: null,
+								accountability: null,
+								fields: {
+									[hashedField]: {
+										field: hashedField,
+										defaultValue: null,
+										nullable: true,
+										generated: false,
+										type: 'hash',
+										dbType: 'nvarchar',
+										precision: null,
+										scale: null,
+										special: ['hash', 'conceal'],
+										note: null,
+										validation: null,
+										alias: false,
+									},
+									[stringField]: {
+										field: stringField,
+										defaultValue: null,
+										nullable: true,
+										generated: false,
+										type: 'string',
+										dbType: 'nvarchar',
+										precision: null,
+										scale: null,
+										special: [],
+										note: null,
+										validation: null,
+										alias: false,
+									},
+								},
+							},
+						},
+						relations: [],
+					},
+				});
+			});
+
+			it('processing special fields', async () => {
+				const result = await service.processValues('read', {
+					string: 'clear-value',
+					password: 'secret-value',
+				});
+
+				expect(result).toMatchObject({ string: 'clear-value', password: HASHED_SECURITY });
+			});
+
+			it('processing aliassed special fields', async () => {
+				const result = await service.processValues(
+					'read',
+					{
+						other_string: 'clear-value',
+						other_password: 'secret-value',
+					},
+					{ other_string: 'string', other_password: 'password' }
+				);
+
+				expect(result).toMatchObject({ other_string: 'clear-value', other_password: HASHED_SECURITY });
 			});
 		});
 	});

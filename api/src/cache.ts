@@ -1,6 +1,7 @@
 import type { SchemaOverview } from '@outroll/types';
 import { getSimpleHash } from '@outroll/utils';
-import Keyv, { Options } from 'keyv';
+import type { Options } from 'keyv';
+import Keyv from 'keyv';
 import env from './env.js';
 import logger from './logger.js';
 import { getMessenger } from './messenger.js';

@@ -14,6 +14,12 @@ vi.mock('../../src/database');
 vi.mock('../../src/env', () => {
 	const MOCK_ENV = {
 		SECRET: 'test',
+		REFRESH_TOKEN_COOKIE_DOMAIN: '',
+		REFRESH_TOKEN_TTL: 0,
+		REFRESH_TOKEN_COOKIE_SECURE: false,
+		ACCESS_TOKEN_COOKIE_DOMAIN: '',
+		ACCESS_TOKEN_COOKIE_TTL: 0,
+		ACCESS_TOKEN_COOKIE_SECURE: false,
 	};
 
 	return {
@@ -81,6 +87,17 @@ test('Uses default public accountability when no token is given', async () => {
 });
 
 test('Sets accountability to payload contents if valid token is passed', async () => {
+	const refreshToken = {};
+
+	vi.mocked(getDatabase).mockReturnValue({
+		select: vi.fn().mockReturnThis(),
+		from: vi.fn().mockReturnThis(),
+		leftJoin: vi.fn().mockReturnThis(),
+		where: vi.fn().mockReturnThis(),
+		andWhere: vi.fn().mockReturnThis(),
+		first: vi.fn().mockResolvedValue(refreshToken),
+	} as unknown as Knex);
+
 	const userID = '3fac3c02-607f-4438-8d6e-6b8b25109b52';
 	const roleID = '38269fc6-6eb6-475a-93cb-479d97f73039';
 	const share = 'ca0ad005-f4ad-4bfe-b428-419ee8784790';
@@ -101,6 +118,7 @@ test('Sets accountability to payload contents if valid token is passed', async (
 			admin_access: adminAccess,
 			share,
 			share_scope: shareScope,
+			refresh_token: 'test',
 		},
 		env['SECRET'],
 		{ issuer: 'directus' }
@@ -151,6 +169,7 @@ test('Sets accountability to payload contents if valid token is passed', async (
 			admin_access: 0,
 			share,
 			share_scope: shareScope,
+			refresh_token: 'test',
 		},
 		env['SECRET'],
 		{ issuer: 'directus' }
@@ -174,16 +193,19 @@ test('Sets accountability to payload contents if valid token is passed', async (
 });
 
 test('Throws InvalidCredentialsException when static token is used, but user does not exist', async () => {
-	vi.mocked(getDatabase).mockReturnValue({
+	const mockDb = {
 		select: vi.fn().mockReturnThis(),
 		from: vi.fn().mockReturnThis(),
 		leftJoin: vi.fn().mockReturnThis(),
 		where: vi.fn().mockReturnThis(),
 		first: vi.fn().mockResolvedValue(undefined),
-	} as unknown as Knex);
+	} as unknown as Knex;
+
+	vi.mocked(getDatabase).mockReturnValue(mockDb);
 
 	const req = {
 		ip: '127.0.0.1',
+		cookies: {},
 		get: vi.fn((string) => {
 			switch (string) {
 				case 'user-agent':

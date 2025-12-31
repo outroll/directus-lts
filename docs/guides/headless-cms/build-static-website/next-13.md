@@ -38,12 +38,12 @@ Run the following commands in the terminal to install dependencies:
 
 ```
 cd my-website
-npm install @directus/sdk
+npm install @outroll/sdk
 ```
 
 Open `my-website` in your code editor.
 
-## Create Helper For @directus/sdk
+## Create Helper For @outroll/sdk
 
 To share a single instance of the Directus JavaScript SDK between multiple pages in this project, create a single helper
 file that can be imported later. Create a new directory called `lib` and a new file called `directus.js` inside of it.

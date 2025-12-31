@@ -50,7 +50,7 @@ import { Field } from '@outroll/types';
 import { computed, defineComponent, PropType, ref, watch } from 'vue';
 import { ValidationError } from '@outroll/types';
 import { useI18n } from 'vue-i18n';
-import formatTitle from '@directus/format-title';
+import formatTitle from '@outroll/format-title';
 import { isEqual } from 'lodash';
 
 export default defineComponent({

@@ -1,39 +1,56 @@
 import { BaseException } from '@outroll/exceptions';
 import type { Accountability } from '@outroll/types';
-import { parseJSON } from '@outroll/utils';
 import express, { Router } from 'express';
 import flatten from 'flat';
 import jwt from 'jsonwebtoken';
-import { Client, errors, generators, Issuer } from 'openid-client';
+import type { AuthorizationParameters, BaseClient, Client, TokenSet } from 'openid-client';
+import { Issuer, generators } from 'openid-client';
 import { getAuthProvider } from '../../auth.js';
-import getDatabase from '../../database/index.js';
-import emitter from '../../emitter.js';
+import { ACCESS_COOKIE_OPTIONS, REFRESH_COOKIE_OPTIONS } from '../../constants.js';
 import env from '../../env.js';
-import { RecordNotUniqueException } from '../../exceptions/database/record-not-unique.js';
 import {
 	InvalidConfigException,
 	InvalidCredentialsException,
-	InvalidProviderException,
 	InvalidTokenException,
-	ServiceUnavailableException,
+	InvalidPayloadException,
 } from '../../exceptions/index.js';
 import logger from '../../logger.js';
 import { respond } from '../../middleware/respond.js';
 import { AuthenticationService } from '../../services/authentication.js';
 import { UsersService } from '../../services/users.js';
-import type { AuthData, AuthDriverOptions, User } from '../../types/index.js';
+import type { AuthDriverOptions } from '../../types/index.js';
 import asyncHandler from '../../utils/async-handler.js';
 import { getConfigFromEnv } from '../../utils/get-config-from-env.js';
 import { getIPFromReq } from '../../utils/get-ip-from-req.js';
-import { getMilliseconds } from '../../utils/get-milliseconds.js';
 import { Url } from '../../utils/url.js';
-import { LocalAuthDriver } from './local.js';
+import { isRedirectAllowedOnLogin } from '../../utils/is-redirect-allowed-on-login.js';
+import { BaseOAuthDriver, type UserPayload } from './baseoauth.js';
 
-export class OpenIDAuthDriver extends LocalAuthDriver {
+export class OpenIDAuthDriver extends BaseOAuthDriver {
 	client: Promise<Client>;
 	redirectUrl: string;
 	usersService: UsersService;
 	config: Record<string, any>;
+
+	getClient(): Promise<BaseClient> {
+		return this.client;
+	}
+
+	getredirectUrl(): string {
+		return this.redirectUrl;
+	}
+
+	getUserService(): UsersService {
+		return this.usersService;
+	}
+
+	getConfig(): Record<string, any> {
+		return this.config;
+	}
+
+	getClientName(): string {
+		return 'OpenID';
+	}
 
 	constructor(options: AuthDriverOptions, config: Record<string, any>) {
 		super(options, config);
@@ -86,15 +103,26 @@ export class OpenIDAuthDriver extends LocalAuthDriver {
 		});
 	}
 
-	generateCodeVerifier(): string {
-		return generators.codeVerifier();
-	}
-
-	async generateAuthUrl(codeVerifier: string, prompt = false): Promise<string> {
+	async generateAuthUrl(
+		codeVerifier: string,
+		prompt = false,
+		additionalParams?: AuthorizationParameters | undefined
+	): Promise<string> {
 		try {
 			const client = await this.client;
 			const codeChallenge = generators.codeChallenge(codeVerifier);
 			const paramsConfig = typeof this.config['params'] === 'object' ? this.config['params'] : {};
+
+			const redirectAfterLogin = additionalParams?.['redirect'];
+			delete additionalParams?.['redirect'];
+
+			let finalRedirectUri = this.redirectUrl;
+
+			if (redirectAfterLogin) {
+				const redirectUriWithParams = new URL(this.redirectUrl);
+				redirectUriWithParams.searchParams.set('redirect', redirectAfterLogin as string);
+				finalRedirectUri = redirectUriWithParams.toString();
+			}
 
 			return client.authorizationUrl({
 				scope: this.config['scope'] ?? 'openid profile email',
@@ -106,28 +134,17 @@ export class OpenIDAuthDriver extends LocalAuthDriver {
 				// Some providers require state even with PKCE
 				state: codeChallenge,
 				nonce: codeChallenge,
+				redirect_uri: finalRedirectUri,
+				...additionalParams,
 			});
 		} catch (e) {
-			throw handleError(e);
+			throw this.handleError(e);
 		}
 	}
 
-	private async fetchUserId(identifier: string): Promise<string | undefined> {
-		const user = await this.knex
-			.select('id')
-			.from('directus_users')
-			.whereRaw('LOWER(??) = ?', ['external_identifier', identifier.toLowerCase()])
-			.first();
-
-		return user?.id;
-	}
-
-	override async getUserID(payload: Record<string, any>): Promise<string> {
-		if (!payload['code'] || !payload['codeVerifier'] || !payload['state']) {
-			logger.warn('[OpenID] No code, codeVerifier or state in payload');
-			throw new InvalidCredentialsException();
-		}
-
+	async getTokenSetAndUserInfo(
+		payload: Record<string, any>
+	): Promise<[TokenSet, Record<string, unknown>, UserPayload]> {
 		let tokenSet;
 		let userInfo;
 
@@ -135,8 +152,16 @@ export class OpenIDAuthDriver extends LocalAuthDriver {
 			const client = await this.client;
 			const codeChallenge = generators.codeChallenge(payload['codeVerifier']);
 
+			let finalRedirectUri = this.redirectUrl;
+
+			if (payload['redirect']) {
+				const redirectUriWithParams = new URL(this.redirectUrl);
+				redirectUriWithParams.searchParams.set('redirect', payload['redirect'] as string);
+				finalRedirectUri = redirectUriWithParams.toString();
+			}
+
 			tokenSet = await client.callback(
-				this.redirectUrl,
+				finalRedirectUri,
 				{ code: payload['code'], state: payload['state'], iss: payload['iss'] },
 				{ code_verifier: payload['codeVerifier'], state: codeChallenge, nonce: codeChallenge }
 			);
@@ -150,13 +175,13 @@ export class OpenIDAuthDriver extends LocalAuthDriver {
 				};
 			}
 		} catch (e) {
-			throw handleError(e);
+			throw this.handleError(e);
 		}
 
 		// Flatten response to support dot indexes
 		userInfo = flatten(userInfo) as Record<string, unknown>;
 
-		const { provider, identifierKey, allowPublicRegistration, requireVerifiedEmail } = this.config;
+		const { provider, identifierKey } = this.config;
 
 		const email = userInfo['email'] ? String(userInfo['email']) : undefined;
 		// Fallback to email if explicit identifier not found
@@ -177,119 +202,9 @@ export class OpenIDAuthDriver extends LocalAuthDriver {
 			auth_data: tokenSet.refresh_token && JSON.stringify({ refreshToken: tokenSet.refresh_token }),
 		};
 
-		const userId = await this.fetchUserId(identifier);
-
-		if (userId) {
-			// Run hook so the end user has the chance to augment the
-			// user that is about to be updated
-			const updatedUserPayload = await emitter.emitFilter(
-				`auth.update`,
-				{},
-				{
-					identifier,
-					provider: this.config['provider'],
-					providerPayload: { accessToken: tokenSet.access_token, userInfo },
-				},
-				{ database: getDatabase(), schema: this.schema, accountability: null }
-			);
-
-			// Update user to update refresh_token and other properties that might have changed
-			await this.usersService.updateOne(userId, updatedUserPayload);
-
-			return userId;
-		}
-
-		const isEmailVerified = !requireVerifiedEmail || userInfo['email_verified'];
-
-		// Is public registration allowed?
-		if (!allowPublicRegistration || !isEmailVerified) {
-			logger.warn(`[OpenID] User doesn't exist, and public registration not allowed for provider "${provider}"`);
-			throw new InvalidCredentialsException();
-		}
-
-		// Run hook so the end user has the chance to augment the
-		// user that is about to be created
-		const updatedUserPayload = await emitter.emitFilter(
-			`auth.create`,
-			userPayload,
-			{
-				identifier,
-				provider: this.config['provider'],
-				providerPayload: { accessToken: tokenSet.access_token, userInfo },
-			},
-			{ database: getDatabase(), schema: this.schema, accountability: null }
-		);
-
-		try {
-			await this.usersService.createOne(updatedUserPayload);
-		} catch (e) {
-			if (e instanceof RecordNotUniqueException) {
-				logger.warn(e, '[OpenID] Failed to register user. User not unique');
-				throw new InvalidProviderException();
-			}
-
-			throw e;
-		}
-
-		return (await this.fetchUserId(identifier)) as string;
-	}
-
-	override async login(user: User): Promise<void> {
-		return this.refresh(user);
-	}
-
-	override async refresh(user: User): Promise<void> {
-		let authData = user.auth_data as AuthData;
-
-		if (typeof authData === 'string') {
-			try {
-				authData = parseJSON(authData);
-			} catch {
-				logger.warn(`[OpenID] Session data isn't valid JSON: ${authData}`);
-			}
-		}
-
-		if (authData?.['refreshToken']) {
-			try {
-				const client = await this.client;
-				const tokenSet = await client.refresh(authData['refreshToken']);
-
-				// Update user refreshToken if provided
-				if (tokenSet.refresh_token) {
-					await this.usersService.updateOne(user.id, {
-						auth_data: JSON.stringify({ refreshToken: tokenSet.refresh_token }),
-					});
-				}
-			} catch (e) {
-				throw handleError(e);
-			}
-		}
+		return [tokenSet, userInfo, userPayload];
 	}
 }
-
-const handleError = (e: any) => {
-	if (e instanceof errors.OPError) {
-		if (e.error === 'invalid_grant') {
-			// Invalid token
-			logger.trace(e, `[OpenID] Invalid grant`);
-			return new InvalidTokenException();
-		}
-
-		// Server response error
-		logger.trace(e, `[OpenID] Unknown OP error`);
-		return new ServiceUnavailableException('Service returned unexpected response', {
-			service: 'openid',
-			message: e.error_description,
-		});
-	} else if (e instanceof errors.RPError) {
-		// Internal client error
-		logger.trace(e, `[OpenID] Unknown RP error`);
-		return new InvalidCredentialsException();
-	}
-
-	logger.trace(e, `[OpenID] Unknown error`);
-	return e;
-};
 
 export function createOpenIDAuthRouter(providerName: string): Router {
 	const router = Router();
@@ -300,22 +215,33 @@ export function createOpenIDAuthRouter(providerName: string): Router {
 			const provider = getAuthProvider(providerName) as OpenIDAuthDriver;
 			const codeVerifier = provider.generateCodeVerifier();
 			const prompt = !!req.query['prompt'];
+			const redirect = req.query['redirect'];
 
-			const token = jwt.sign(
-				{ verifier: codeVerifier, redirect: req.query['redirect'], prompt },
-				env['SECRET'] as string,
-				{
-					expiresIn: '5m',
-					issuer: 'directus',
-				}
-			);
+			if (isRedirectAllowedOnLogin(redirect, providerName) === false) {
+				throw new InvalidPayloadException(`URL "${redirect}" can't be used to redirect after login`);
+			}
 
-			res.cookie(`openid.${providerName}`, token, {
+			const token = jwt.sign({ verifier: codeVerifier, redirect, prompt }, env['SECRET'] as string, {
+				expiresIn: '5m',
+				issuer: 'directus',
+			});
+
+			const additionalParams = { ...req.query };
+			delete additionalParams['prompt'];
+
+			const authUrl = await provider.generateAuthUrl(codeVerifier, prompt, additionalParams);
+
+			const urlParams = new URL(authUrl);
+			const state = urlParams.searchParams.get('state');
+
+			const cookieName = `openid.${providerName}.${state || ''}`;
+
+			res.cookie(cookieName, token, {
 				httpOnly: true,
 				sameSite: 'lax',
 			});
 
-			return res.redirect(await provider.generateAuthUrl(codeVerifier, prompt));
+			return res.redirect(authUrl);
 		}),
 		respond
 	);
@@ -332,10 +258,17 @@ export function createOpenIDAuthRouter(providerName: string): Router {
 	router.get(
 		'/callback',
 		asyncHandler(async (req, res, next) => {
+			const redirectUrl = req.query['redirect'] as string;
+			const validRedirectUrl = isRedirectAllowedOnLogin(redirectUrl, providerName) ? redirectUrl : null;
+			const state = req.query['state'] as string;
+
+			const cookieName = `openid.${providerName}.${state || ''}`;
+			const cookieValue = req.cookies[cookieName];
+
 			let tokenData;
 
 			try {
-				tokenData = jwt.verify(req.cookies[`openid.${providerName}`], env['SECRET'] as string, {
+				tokenData = jwt.verify(cookieValue, env['SECRET'] as string, {
 					issuer: 'directus',
 				}) as {
 					verifier: string;
@@ -343,8 +276,14 @@ export function createOpenIDAuthRouter(providerName: string): Router {
 					prompt: boolean;
 				};
 			} catch (e: any) {
-				logger.warn(e, `[OpenID] Couldn't verify OpenID cookie`);
-				throw new InvalidCredentialsException();
+				logger.warn(e, `[OpenID] Couldn't verify OpenID cookie ${state ? `for state ${state}` : ''}`);
+
+				const baseUrl = env['PUBLIC_URL'];
+				const loginPath = '/admin/login';
+				const url = new URL(loginPath, baseUrl);
+
+				const redirectTo = validRedirectUrl || url.toString();
+				return res.redirect(`${redirectTo}?reason=INVALID_CREDENTIALS`);
 			}
 
 			const { verifier, redirect, prompt } = tokenData;
@@ -368,13 +307,14 @@ export function createOpenIDAuthRouter(providerName: string): Router {
 			let authResponse;
 
 			try {
-				res.clearCookie(`openid.${providerName}`);
+				res.clearCookie(cookieName);
 
 				authResponse = await authenticationService.login(providerName, {
 					code: req.query['code'],
 					codeVerifier: verifier,
 					state: req.query['state'],
 					iss: req.query['iss'],
+					redirect: validRedirectUrl,
 				});
 			} catch (error: any) {
 				// Prompt user for a new refresh_token if invalidated
@@ -403,14 +343,8 @@ export function createOpenIDAuthRouter(providerName: string): Router {
 			const { accessToken, refreshToken, expires } = authResponse;
 
 			if (redirect) {
-				res.cookie(env['REFRESH_TOKEN_COOKIE_NAME'], refreshToken, {
-					httpOnly: true,
-					domain: env['REFRESH_TOKEN_COOKIE_DOMAIN'],
-					maxAge: getMilliseconds(env['REFRESH_TOKEN_TTL']),
-					secure: env['REFRESH_TOKEN_COOKIE_SECURE'] ?? false,
-					sameSite: (env['REFRESH_TOKEN_COOKIE_SAME_SITE'] as 'lax' | 'strict' | 'none') || 'strict',
-				});
-
+				res?.cookie(env['ACCESS_TOKEN_COOKIE_NAME'], accessToken, ACCESS_COOKIE_OPTIONS);
+				res?.cookie(env['REFRESH_TOKEN_COOKIE_NAME'], refreshToken, REFRESH_COOKIE_OPTIONS);
 				return res.redirect(redirect);
 			}
 

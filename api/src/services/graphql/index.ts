@@ -1,16 +1,21 @@
-import { FUNCTIONS } from '@outroll/constants';
+import { Action, FUNCTIONS } from '@outroll/constants';
 import type { BaseException } from '@outroll/exceptions';
 import type { Accountability, Aggregate, Filter, PrimaryKey, Query, SchemaOverview } from '@outroll/types';
-import { Action } from '@outroll/constants';
 import { parseFilterFunctionPath } from '@outroll/utils';
 import argon2 from 'argon2';
-import {
+import type {
 	ArgumentNode,
-	execute,
 	ExecutionResult,
 	FieldNode,
 	FormattedExecutionResult,
 	FragmentDefinitionNode,
+	GraphQLNullableType,
+	GraphQLResolveInfo,
+	InlineFragmentNode,
+	SelectionNode,
+	ValueNode,
+} from 'graphql';
+import {
 	GraphQLBoolean,
 	GraphQLEnumType,
 	GraphQLError,
@@ -19,36 +24,35 @@ import {
 	GraphQLInt,
 	GraphQLList,
 	GraphQLNonNull,
-	GraphQLNullableType,
 	GraphQLObjectType,
-	GraphQLResolveInfo,
 	GraphQLScalarType,
 	GraphQLSchema,
 	GraphQLString,
 	GraphQLUnionType,
-	InlineFragmentNode,
 	NoSchemaIntrospectionCustomRule,
-	SelectionNode,
+	execute,
 	specifiedRules,
 	validate,
-	ValueNode,
 } from 'graphql';
-import {
-	GraphQLJSON,
-	InputTypeComposer,
+import type {
 	InputTypeComposerFieldConfigMapDefinition,
-	ObjectTypeComposer,
 	ObjectTypeComposerFieldConfigAsObjectDefinition,
 	ObjectTypeComposerFieldConfigDefinition,
 	ObjectTypeComposerFieldConfigMapDefinition,
 	ResolverDefinition,
-	SchemaComposer,
-	toInputObjectType,
 } from 'graphql-compose';
+import { GraphQLJSON, InputTypeComposer, ObjectTypeComposer, SchemaComposer, toInputObjectType } from 'graphql-compose';
 import type { Knex } from 'knex';
 import { flatten, get, mapKeys, merge, omit, pick, set, transform, uniq } from 'lodash-es';
 import { clearSystemCache, getCache } from '../../cache.js';
-import { DEFAULT_AUTH_PROVIDER, GENERATE_SPECIAL } from '../../constants.js';
+import {
+	ACCESS_COOKIE_CLEAR_OPTIONS,
+	ACCESS_COOKIE_OPTIONS,
+	DEFAULT_AUTH_PROVIDER,
+	GENERATE_SPECIAL,
+	REFRESH_COOKIE_CLEAR_OPTIONS,
+	REFRESH_COOKIE_OPTIONS,
+} from '../../constants.js';
 import getDatabase from '../../database/index.js';
 import env from '../../env.js';
 import { ForbiddenException, GraphQLValidationException, InvalidPayloadException } from '../../exceptions/index.js';
@@ -56,7 +60,6 @@ import { getExtensionManager } from '../../extensions.js';
 import type { AbstractServiceOptions, GraphQLParams, Item } from '../../types/index.js';
 import { generateHash } from '../../utils/generate-hash.js';
 import { getGraphQLType } from '../../utils/get-graphql-type.js';
-import { getMilliseconds } from '../../utils/get-milliseconds.js';
 import { reduceSchema } from '../../utils/reduce-schema.js';
 import { sanitizeQuery } from '../../utils/sanitize-query.js';
 import { validateQuery } from '../../utils/validate-query.js';
@@ -1897,16 +1900,6 @@ export class GraphQLService {
 							}),
 					  }
 					: GraphQLBoolean,
-				flows: {
-					type: new GraphQLObjectType({
-						name: 'server_info_flows',
-						fields: {
-							execAllowedModules: {
-								type: new GraphQLList(GraphQLString),
-							},
-						},
-					}),
-				},
 			});
 		}
 
@@ -2079,13 +2072,8 @@ export class GraphQLService {
 					const result = await authenticationService.login(DEFAULT_AUTH_PROVIDER, args, args?.otp);
 
 					if (args['mode'] === 'cookie') {
-						res?.cookie(env['REFRESH_TOKEN_COOKIE_NAME'], result['refreshToken'], {
-							httpOnly: true,
-							domain: env['REFRESH_TOKEN_COOKIE_DOMAIN'],
-							maxAge: getMilliseconds(env['REFRESH_TOKEN_TTL']),
-							secure: env['REFRESH_TOKEN_COOKIE_SECURE'] ?? false,
-							sameSite: (env['REFRESH_TOKEN_COOKIE_SAME_SITE'] as 'lax' | 'strict' | 'none') || 'strict',
-						});
+						res?.cookie(env['ACCESS_TOKEN_COOKIE_NAME'], result['accessToken'], ACCESS_COOKIE_OPTIONS);
+						res?.cookie(env['REFRESH_TOKEN_COOKIE_NAME'], result['refreshToken'], REFRESH_COOKIE_OPTIONS);
 					}
 
 					return {
@@ -2126,13 +2114,8 @@ export class GraphQLService {
 					const result = await authenticationService.refresh(currentRefreshToken);
 
 					if (args['mode'] === 'cookie') {
-						res?.cookie(env['REFRESH_TOKEN_COOKIE_NAME'], result['refreshToken'], {
-							httpOnly: true,
-							domain: env['REFRESH_TOKEN_COOKIE_DOMAIN'],
-							maxAge: getMilliseconds(env['REFRESH_TOKEN_TTL']),
-							secure: env['REFRESH_TOKEN_COOKIE_SECURE'] ?? false,
-							sameSite: (env['REFRESH_TOKEN_COOKIE_SAME_SITE'] as 'lax' | 'strict' | 'none') || 'strict',
-						});
+						res?.cookie(env['ACCESS_TOKEN_COOKIE_NAME'], result['accessToken'], ACCESS_COOKIE_OPTIONS);
+						res?.cookie(env['REFRESH_TOKEN_COOKIE_NAME'], result['refreshToken'], REFRESH_COOKIE_OPTIONS);
 					}
 
 					return {
@@ -2147,7 +2130,7 @@ export class GraphQLService {
 				args: {
 					refresh_token: GraphQLString,
 				},
-				resolve: async (_, args, { req }) => {
+				resolve: async (_, args, { req, res }) => {
 					const accountability: Accountability = { role: null };
 
 					if (req?.ip) accountability.ip = req.ip;
@@ -2170,6 +2153,15 @@ export class GraphQLService {
 					}
 
 					await authenticationService.logout(currentRefreshToken);
+
+					if (req?.cookies?.[env['ACCESS_TOKEN_COOKIE_NAME'] as string]) {
+						res?.clearCookie(env['ACCESS_TOKEN_COOKIE_NAME'] as string, ACCESS_COOKIE_CLEAR_OPTIONS);
+					}
+
+					if (req?.cookies?.[env['REFRESH_TOKEN_COOKIE_NAME'] as string]) {
+						res?.clearCookie(env['REFRESH_TOKEN_COOKIE_NAME'] as string, REFRESH_COOKIE_CLEAR_OPTIONS);
+					}
+
 					return true;
 				},
 			},
@@ -2302,11 +2294,11 @@ export class GraphQLService {
 				resolve: async (_, args) => {
 					const { nanoid } = await import('nanoid');
 
-					if (args['length'] && Number(args['length']) > 500) {
-						throw new InvalidPayloadException(`"length" can't be more than 500 characters`);
+					if (args['length'] !== undefined && (args['length'] < 1 || args['length'] > 500)) {
+						throw new InvalidPayloadException(`"length" must be between 1 and 500`);
 					}
 
-					return nanoid(args['length'] ? Number(args['length']) : 32);
+					return nanoid(args['length'] ? args['length'] : 32);
 				},
 			},
 			utils_hash_generate: {

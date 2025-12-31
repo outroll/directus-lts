@@ -1,6 +1,6 @@
 {
 	"name": "@outroll/create-directus-extension",
-	"version": "1.0.6",
+	"version": "9.26.13",
 	"description": "A small util that will scaffold a Directus extension",
 	"keywords": [
 		"directus",
@@ -10,10 +10,10 @@
 	"homepage": "https://directus.io",
 	"repository": {
 		"type": "git",
-		"url": "https://github.com/directus/directus.git",
+		"url": "https://github.com/outroll/directus-lts.git",
 		"directory": "packages/create-directus-extension"
 	},
-	"funding": "https://github.com/directus/directus?sponsor=1",
+	"funding": "https://github.com/outroll/directus-lts?sponsor=1",
 	"license": "GPL-3.0-only",
 	"author": "Nicola Krumschmidt",
 	"contributors": [
