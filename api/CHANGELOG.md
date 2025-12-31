@@ -1,6 +1,6 @@
 # @outroll/api
 
-## 12.0.5
+## 1.1.0
 
 ### Patch Changes
 

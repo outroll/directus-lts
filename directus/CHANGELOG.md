@@ -8,7 +8,7 @@
 - 853cc61: Bump node-forge to 1.3.2
 - Updated dependencies [853cc61]
 - Updated dependencies [853cc61]
-  - @outroll/api@12.0.5
+  - @outroll/api@1.1.0
 
 ## 11.0.4
 
