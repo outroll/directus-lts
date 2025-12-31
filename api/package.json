@@ -1,6 +1,6 @@
 {
 	"name": "@outroll/api",
-	"version": "1.1.0",
+	"version": "1.1.1",
 	"description": "Directus is a real-time API and App dashboard for managing SQL database content",
 	"type": "module",
 	"keywords": [
