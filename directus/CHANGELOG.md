@@ -1,6 +1,6 @@
 # directus9
 
-## 11.0.5
+## 1.1.0
 
 ### Patch Changes
 
@@ -130,7 +130,7 @@
 
 - 645ef51: Bump dependencies to fix security alerts
 - Updated dependencies [645ef51]
-  - @outroll/api@11.0.5
+  - @outroll/api@1.1.0
 
 ## 10.3.4
 

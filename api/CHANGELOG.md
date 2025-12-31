@@ -145,7 +145,7 @@
   - @outroll/storage-driver-local@9.26.9
   - @outroll/storage-driver-s3@9.26.11
 
-## 11.0.5
+## 1.1.0
 
 ### Patch Changes
 
