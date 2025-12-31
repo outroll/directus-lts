@@ -93,7 +93,7 @@
 
 ### Patch Changes
 
-- 9e4a63a: @directus9
+- 9e4a63a: @directus-lts
 - Updated dependencies [9e4a63a]
   - @outroll/extensions-sdk@9.26.1
   - @outroll/constants@9.26.1

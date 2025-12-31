@@ -1,7 +1,7 @@
 {
 	"name": "@outroll/tsconfig",
 	"version": "2.0.0",
-	"description": "TSConfig files used in Directus9 projects",
+	"description": "TSConfig files used in directus-lts projects",
 	"homepage": "https://directus.io",
 	"repository": {
 		"type": "git",

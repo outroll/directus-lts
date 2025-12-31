@@ -52,16 +52,16 @@ Directus 9**
 
 Directus requires NodeJS 10+.
 
-Install Directus9 :
+Install directus-lts :
 
 ```
-npm install @outroll/directus9
+npm install @outroll/directus-lts
 ```
 
 Or using yarn:
 
 ```
-yarn install @outroll/directus9
+yarn install @outroll/directus-lts
 ```
 
 Create a new project with our simple CLI tool:
@@ -92,7 +92,7 @@ You need to change your dependencies :
 1. In package.json
 
 ```
-"directus":9.0.0^ --> "@outroll/directus9": 9.0.0^
+"directus":9.0.0^ --> "@outroll/directus-lts": 9.0.0^
 "@directus/some-package" --> "@outroll/some-package"
 ```
 
@@ -112,11 +112,11 @@ import {...} from "@directus/some-package"
 should become :
 
 ```ts
-import {...} from "@outroll/directus9"
+import {...} from "@outroll/directus-lts"
 import {...} from "@outroll/some-package"
 ```
 
-4. You don't have to do any changes to your databases. Directus9 use the same schema as directus@9.0.0^. As a
+4. You don't have to do any changes to your databases. directus-lts use the same schema as directus@9.0.0^. As a
    consequence, you don't need other changes than the three steps below.
 
 ## Contributing
@@ -132,7 +132,7 @@ reach out a member of the Core Team via [GitHub](https://github.com/outroll/dire
 
 ## Supporting
 
-This is a fork of directus9. We welcome contribution and no support is asked.
+This is a fork of directus-lts. We welcome contribution and no support is asked.
 
 <p>&nbsp;</p>
 

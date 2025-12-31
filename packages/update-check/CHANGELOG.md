@@ -46,4 +46,4 @@
 
 ### Patch Changes
 
-- 9e4a63a: @directus9
+- 9e4a63a: @directus-lts

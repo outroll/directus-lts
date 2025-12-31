@@ -1,5 +1,5 @@
 {
-	"name": "@outroll/directus9",
+	"name": "@outroll/directus-lts",
 	"version": "1.1.0",
 	"description": "Directus is a real-time API and App dashboard for managing SQL database content",
 	"type": "module",

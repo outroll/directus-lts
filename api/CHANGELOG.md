@@ -424,7 +424,7 @@
 
 ### Patch Changes
 
-- 9e4a63a: @directus9
+- 9e4a63a: @directus-lts
 - Updated dependencies [9e4a63a]
   - @outroll/storage-driver-cloudinary@9.26.1
   - @outroll/storage-driver-azure@9.26.1
